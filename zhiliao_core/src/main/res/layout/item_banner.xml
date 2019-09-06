@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical">
+
+    <RelativeLayout
+        android:id="@+id/layout_banner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp">
+
+        <!--<com.youth.banner.Banner-->
+        <!--android:id="@+id/banner"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="150dp"-->
+        <!--android:layout_centerHorizontal="true"-->
+        <!--android:background="@drawable/banner_background" />-->
+
+        <com.wenjian.loopbanner.LoopBanner
+            android:id="@+id/banner"
+            android:layout_width="match_parent"
+            android:layout_height="130dp"
+            app:lb_canLoop="true"
+            app:lb_indicatorGravity="bottomCenter"
+            app:lb_indicatorSelect="@drawable/indicator_select"
+            app:lb_indicatorStyle="normal"
+            app:lb_indicatorUnSelect="@drawable/indicator_unselect"
+            app:lb_interval="4000"
+            app:lb_pageMargin="16dp" />
+
+
+    </RelativeLayout>
+
+</LinearLayout>

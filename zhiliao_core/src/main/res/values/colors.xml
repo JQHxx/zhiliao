@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="toolbar">#0E1326</color>
+    <color name="toolbar_search">#1E2337</color>
+    <color name="switch_selected">#27FDB9</color>
+    <color name="switch_unselected">#5C606B</color>
+    <color name="switch_background">#171C2C</color>
+    <color name="search_color">#8E919B</color>
+    <color name="old_age_color">#39C699</color>
+    <color name="new_age_color">#FCC23B</color>
+    <color name="white">#FFFFFF</color>
+    <color name="media_item_icon_not_playing">#ccc</color>
+    <color name="bt_accent">#00B8D4</color>
+    <color name="media_item_icon_playing">@color/bt_accent</color>
+    <color name="divider">#232837</color>
+    <color name="black">#000000</color>
+    <color name="green">#FF05B962</color>
+    <color name="grey">#9e9e9e</color>
+    <color name="colorAccentDarkTheme">#ff5722</color>
+    <color name="translucent_white">#80FFFFFF</color>
+    <color name="searchbar">#222739</color>
+    <color name="searchbar_edit_layout">#2F3346</color>
+</resources>

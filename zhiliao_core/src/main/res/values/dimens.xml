@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="media_item_height">72dp</dimen>
+    <dimen name="media_item_icon_margin_start">12dp</dimen>
+    <dimen name="media_item_text_margin_start">60dp</dimen>
+    <dimen name="dp_16">16dp</dimen>
+    <dimen name="dp_8">8dp</dimen>
+    <dimen name="dp_10">10dp</dimen>
+    <dimen name="dp_1">1dp</dimen>
+    <dimen name="dp_2">2dp</dimen>
+    <dimen name="dp_4">4dp</dimen>
+    <dimen name="dp_20">20dp</dimen>
+    <dimen name="dp_64">64dp</dimen>
+    <dimen name="dp_24">24dp</dimen>
+    <dimen name="dp_56">56dp</dimen>
+    <dimen name="dp_48">48dp</dimen>
+    <dimen name="dp_32">32dp</dimen>
+    <dimen name="dp_36">36dp</dimen>
+    <dimen name="dp_78">78dp</dimen>
+    <dimen name="dp_120">120dp</dimen>
+    <dimen name="dp_200">200dp</dimen>
+    <dimen name="dp_05">0.5dp</dimen>
+    <dimen name="dp_35">35dp</dimen>
+    <dimen name="dp_160">160</dimen>
+    <dimen name="dp_90">90</dimen>
+
+    <dimen name="sp_48">48sp</dimen>
+    <dimen name="sp_20">20sp</dimen>
+    <dimen name="sp_16">16sp</dimen>
+    <dimen name="sp_18">18sp</dimen>
+    <dimen name="sp_14">14sp</dimen>
+    <dimen name="sp_12">12sp</dimen>
+
+</resources>

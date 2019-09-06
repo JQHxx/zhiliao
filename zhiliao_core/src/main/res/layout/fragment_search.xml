@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/toolbar"
+    android:orientation="vertical">
+
+    <EditText
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="@dimen/dp_20"
+        android:layout_marginTop="20dp"
+        android:layout_marginEnd="@dimen/dp_20"
+        android:layout_marginBottom="4dp"
+        android:background="@drawable/toolbar_search_background"
+        android:drawablePadding="8dp"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:hint="@string/search"
+        android:imeOptions="actionSearch|flagNoFullscreen"
+        android:inputType="textFilter|textNoSuggestions"
+        android:maxLines="1"
+        android:paddingStart="@dimen/dp_16"
+        android:paddingEnd="@dimen/dp_16"
+        android:textColor="@color/white"
+        android:textColorHint="@color/white"
+        android:visibility="gone"
+        tools:ignore="RtlHardcoded" />
+
+    <include layout="@layout/searchbar" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_search"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="8"
+        android:background="@color/toolbar"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:paddingTop="8dp" />
+
+
+    <include layout="@layout/controlbar" />
+
+
+</LinearLayout>

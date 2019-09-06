@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/toolbar"
+    tools:ignore="HardcodedText">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="bottom|end"
+        android:background="#171C2C"
+        android:orientation="horizontal">
+
+        <!--android:text="不具名的悲伤 - 罗志祥"-->
+        <TextView
+            android:id="@+id/song_description"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="60dp"
+            android:layout_weight="5"
+            android:gravity="start|center_vertical"
+            android:text="知了音乐 让生活充满音乐"
+            android:textColor="@color/white"
+            tools:ignore="HardcodedText" />
+
+        <com.mikepenz.iconics.view.IconicsTextView
+            android:id="@+id/song_play_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="{faw-play}"
+            android:textColor="#27FDB9"
+            android:textSize="15sp" />
+
+        <com.mikepenz.iconics.view.IconicsTextView
+            android:id="@+id/song_list_button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:text="{faw-list}"
+            android:textColor="#27FDB9"
+            android:textSize="15sp" />
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/song_cover"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:layout_marginStart="@dimen/dp_10"
+        android:src="@drawable/disk" />
+</FrameLayout>
