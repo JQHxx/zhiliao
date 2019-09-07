@@ -44,6 +44,7 @@ import com.dev.rexhuang.zhiliao_core.base.ZhiliaoFragment;
 import com.dev.rexhuang.zhiliao_core.callback.MediaFragmentListener;
 import com.dev.rexhuang.zhiliao_core.config.ConfigKeys;
 import com.dev.rexhuang.zhiliao_core.config.Zhiliao;
+import com.dev.rexhuang.zhiliao_core.detail.DetailFragment;
 import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongSearchEntity;
 import com.dev.rexhuang.zhiliao_core.find.adapter.SearchAdapter;
@@ -66,6 +67,7 @@ import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import me.yokeyword.fragmentation.ISupportFragment;
 
 /**
  * *  created by RexHuang
@@ -109,7 +111,25 @@ public class SearchFragment extends ZhiliaoFragment {
     @OnClick(R2.id.back_arrow)
     void onClickBack() {
         getSupportDelegate().pop();
-//        getSupportDelegate().h
+    }
+
+    @OnClick(R2.id.controlbar)
+    void onClickControl() {
+        DetailFragment detailFragment = new DetailFragment();
+        Bundle arg = detailFragment.getArguments();
+        MusicEntity musicEntity = MusicManager.getInstance().getNowPlayingSongInfo();
+        if (musicEntity != null) {
+            if (arg != null) {
+                arg.putString(BaseActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION, musicEntity.getId());
+                arg.putFloat(BaseActivity.EXTRA_CURRENT_MEDIA_ROTATION, song_cover.getRotation());
+            } else {
+                arg = new Bundle();
+                arg.putString(BaseActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION, musicEntity.getId());
+                arg.putFloat(BaseActivity.EXTRA_CURRENT_MEDIA_ROTATION, song_cover.getRotation());
+            }
+            detailFragment.setArguments(arg);
+        }
+        getSupportDelegate().start(detailFragment, ISupportFragment.SINGLETASK);
     }
 
     @OnClick(R2.id.song_list_button)
@@ -133,23 +153,22 @@ public class SearchFragment extends ZhiliaoFragment {
             dialog.show();
             recyclerView = dialog.findViewById(R.id.rcv_songs);
             recyclerView.setLayoutManager(new LinearLayoutManager(get_mActivity()));
-            queueAdapter = new QueueAdapter(R.layout.item_queue, queueManager.getPlayingQueue());
+            queueAdapter = new QueueAdapter(R.layout.item_queue, MusicManager.getInstance().getPlayList());
+//            queueAdapter = new QueueAdapter(R.layout.item_queue, queueManager.getPlayingQueue());
             queueAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
                 @Override
                 public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                    MediaBrowserCompat.MediaItem item = (MediaBrowserCompat.MediaItem) adapter.getItem(position);
-                    queueManager.setCurrentItem(item);
-                    queueAdapter.notifyDataSetChanged();
-                    mMediaFragmentListener.onMediaItemSelected(item);
+                    MusicManager.getInstance().playMusicByIndex(position);
+
                 }
             });
             queueAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
                 @Override
                 public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
                     if (view.getId() == R.id.iv_more) {
-                        MediaBrowserCompat.MediaItem item = (MediaBrowserCompat.MediaItem) adapter.getItem(position);
-                        queueManager.removeFromPlayingQueue(item);
-                        queueAdapter.notifyItemRemoved(position);
+//                        MediaBrowserCompat.MediaItem item = (MediaBrowserCompat.MediaItem) adapter.getItem(position);
+//                        queueManager.removeFromPlayingQueue(item);
+//                        queueAdapter.notifyItemRemoved(position);
                     }
                 }
             });
@@ -161,15 +180,11 @@ public class SearchFragment extends ZhiliaoFragment {
 
     @OnClick(R2.id.song_play_button)
     void onClickPlay() {
-//        song_play_button.setText(playButtonState[index % playButtonState.length]);
-//        index++;
-        if (mMediaFragmentListener != null) {
-            if (PlayState.isPlaying()) {
-                mMediaFragmentListener.onPlayAction(PlayActions.PAUSE);
-            } else {
-                mMediaFragmentListener.onPlayAction(PlayActions.PLAY);
-            }
-
+        Logger.d(MusicManager.getInstance().isPlaying());
+        if (MusicManager.getInstance().isPlaying()) {
+            pauseMusic();
+        } else {
+            playMusic();
         }
     }
 
@@ -181,8 +196,7 @@ public class SearchFragment extends ZhiliaoFragment {
 
     @Override
     public void onBindView(Bundle savedInstanceState, View view) {
-//        mMediaFragmentListener = (MediaFragmentListener) get_mActivity();
-//        mediaBrowser = mMediaFragmentListener.getMediaBrowser();
+        searchEditText.requestFocus();
         objectAnimator = ObjectAnimator.ofFloat(song_cover, "rotation", 0f, 360f).setDuration(10000);
         objectAnimator.setInterpolator(new LinearInterpolator());
         objectAnimator.setRepeatCount(-1);
@@ -214,85 +228,13 @@ public class SearchFragment extends ZhiliaoFragment {
                     objectAnimator.resume();
                 } else if (!objectAnimator.isStarted()) {
                     objectAnimator.start();
-//                    objectAnimator.setFloatValues(rotation);
                 }
             }
         }
-
-        onPlayerEventListener = new OnPlayerEventListener() {
-            @Override
-            public void onMusicSwitch(MusicEntity musicEntity) {
-                if (musicEntity != null) {
-                    song_description.setText(String.format("%s - %s", musicEntity.getName(), musicEntity.getSingers().get(0).getName()));
-                    Glide.with(get_mActivity())
-                            .load(musicEntity.getCover())
-                            .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                            .into(song_cover);
-                }
-            }
-
-            @Override
-            public void onPlayerStart() {
-                song_play_button.setText(pause);
-                if (objectAnimator != null) {
-                    if (objectAnimator.isPaused()) {
-                        objectAnimator.resume();
-                    } else if (!objectAnimator.isStarted()) {
-                        objectAnimator.start();
-                    }
-                }
-            }
-
-            @Override
-            public void onPlayerPause() {
-                song_play_button.setText(play);
-                if (objectAnimator != null) {
-                    if (objectAnimator.isRunning()) {
-                        objectAnimator.pause();
-                    }
-                }
-            }
-
-            @Override
-            public void onPlayerStop() {
-                song_play_button.setText(play);
-                if (objectAnimator != null) {
-                    objectAnimator.end();
-                }
-            }
-
-            @Override
-            public void onPlayCompletion(MusicEntity musicEntity) {
-
-            }
-
-            @Override
-            public void onBuffering() {
-                Toast.makeText(get_mActivity(), "正在缓冲,请稍等!!", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void onError(int errorCode, String errorMsg) {
-                Toast.makeText(get_mActivity(), "播放出错!!", Toast.LENGTH_SHORT).show();
-            }
-        };
-        MusicManager.getInstance().addPlayerEventListener(onPlayerEventListener);
         mSearchAdapter = new SearchAdapter(R.layout.item_music, new ArrayList<>());
         mSearchAdapter.setOnItemClickListener((adapter, view1, position) -> {
-            //暂时屏蔽
-            /*MediaBrowserCompat.MediaItem mediaItem = (MediaBrowserCompat.MediaItem) adapter.getItem(position);
-            if (!PlayState.isPlaying()) {
-                mMediaFragmentListener.onMediaItemSelected(mediaItem);
-            } else {
-                QueueManager.getInstance().addToPlayingQueue(mediaItem);
-            }*/
-
-            //starrySky
-//            if (mediaBrowser != null && mediaBrowser.isConnected()) {
             MusicManager.getInstance().playMusic(mMusicEntities, position);
-            Toast.makeText(get_mActivity(), "onClick : " + position, Toast.LENGTH_SHORT).show();
-
-//            }
+//            Toast.makeText(get_mActivity(), "onClick : " + position, Toast.LENGTH_SHORT).show();
         });
         rv_search.setLayoutManager(new LinearLayoutManager(get_mActivity()));
         rv_search.setAdapter(mSearchAdapter);
@@ -327,6 +269,50 @@ public class SearchFragment extends ZhiliaoFragment {
             }
         });
 
+        onPlayerEventListener = new OnPlayerEventListener() {
+            @Override
+            public void onMusicSwitch(MusicEntity musicEntity) {
+                if (musicEntity != null) {
+                    showPlaying(musicEntity, false);
+                    if (queueAdapter != null) {
+                        queueAdapter.notifyDataSetChanged();
+                    }
+                }
+            }
+
+            @Override
+            public void onPlayerStart() {
+                song_play_button.setText(pause);
+                playAnimation();
+            }
+
+            @Override
+            public void onPlayerPause() {
+                showStopped();
+            }
+
+            @Override
+            public void onPlayerStop() {
+                showStopped();
+            }
+
+            @Override
+            public void onPlayCompletion(MusicEntity musicEntity) {
+                showStopped();
+            }
+
+            @Override
+            public void onBuffering() {
+                Toast.makeText(get_mActivity(), "正在缓冲,请稍等!!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onError(int errorCode, String errorMsg) {
+                Toast.makeText(get_mActivity(), "播放出错!!", Toast.LENGTH_SHORT).show();
+            }
+        };
+        MusicManager.getInstance().addPlayerEventListener(onPlayerEventListener);
+
 
     }
 
@@ -334,18 +320,12 @@ public class SearchFragment extends ZhiliaoFragment {
     @Override
     public void onStart() {
         super.onStart();
-//        if (mediaBrowser.isConnected()) {
-//            onConnected();
-//        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-//        MediaControllerCompat controller = MediaControllerCompat.getMediaController(get_mActivity());
-//        if (controller != null) {
-//            controller.unregisterCallback(mMediaControllerCallback);
-//        }
+
     }
 
     @Override
@@ -354,160 +334,51 @@ public class SearchFragment extends ZhiliaoFragment {
         MusicManager.getInstance().removePlayerEventListener(onPlayerEventListener);
     }
 
-    private void onConnected() {
-        if (isDetached()) {
-            return;
-        }
-        if (mMediaId == null) {
-            mMediaId = mMediaFragmentListener.getMediaBrowser().getRoot();
-        }
-
-        // Unsubscribing before subscribing is required if this mediaId already has a subscriber
-        // on this MediaBrowser instance. Subscribing to an already subscribed mediaId will replace
-        // the callback, but won't trigger the initial callback.onChildrenLoaded.
-        //
-        // This is temporary: A bug is being fixed that will make subscribe
-        // consistently call onChildrenLoaded initially, no matter if it is replacing an existing
-        // subscriber or not. Currently this only happens if the mediaID has no previous
-        // subscriber or if the media content changes on the service side, so we need to
-        // unsubscribe first.
-        Logger.d("onConnectd subscribe");
-        mMediaFragmentListener.getMediaBrowser().unsubscribe(mMediaId);
-        mMediaFragmentListener.getMediaBrowser().subscribe(mMediaId, mSubscriptionCallback);
-
-        // Add MediaController callback so we can redraw the list when metadata changes:
-        MediaControllerCompat controller = MediaControllerCompat.getMediaController(Objects.requireNonNull(getActivity()));
-        if (controller != null) {
-            onMetadataChanged(controller.getMetadata());
-            onPlaybackStateChanged(controller.getPlaybackState());
-            controller.registerCallback(mMediaControllerCallback);
-        }
-    }
-
-    private void onPlaybackStateChanged(PlaybackStateCompat state) {
-        if (state == null) {
-            return;
-        }
-        Logger.t(TAG).d("onPlaybackStateChanged" + state.getState());
-        switch (state.getState()) {
-            case PlaybackStateCompat.STATE_PLAYING:
-                showPlaying();
-                break;
-            case PlaybackStateCompat.STATE_STOPPED:
-                showStopped();
-                break;
-            case PlaybackStateCompat.STATE_PAUSED:
-                showStopped();
-            case PlaybackStateCompat.STATE_ERROR:
-                Toast.makeText(get_mActivity(), state.getErrorMessage(), Toast.LENGTH_LONG).show();
-                break;
-            default:
-                break;
-        }
-    }
-
-    private void onMetadataChanged(MediaMetadataCompat metadata) {
-        if (metadata == null) {
-            return;
-        }
-        Logger.t(TAG).d("onMetadataChanged" + metadata);
-        MediaDescriptionCompat descriptionCompat = metadata.getDescription();
-        String title = (String) descriptionCompat.getTitle();
-        String subTitle = (String) descriptionCompat.getSubtitle();
-        Uri iconUri = descriptionCompat.getIconUri();
-        if (title.length() > 0 || subTitle.length() > 0) {
-            song_description.setText(String.format("%s - %s", descriptionCompat.getTitle(), descriptionCompat.getSubtitle()));
-        }
-        if (iconUri != null) {
-            Glide.with(get_mActivity())
-                    .load(descriptionCompat.getIconUri())
-                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                    .into(song_cover);
-        }
-
-    }
-
-    private final MediaControllerCompat.Callback mMediaControllerCallback =
-            new MediaControllerCompat.Callback() {
-                @Override
-                public void onMetadataChanged(MediaMetadataCompat metadata) {
-                    super.onMetadataChanged(metadata);
-                    SearchFragment.this.onMetadataChanged(metadata);
-                }
-
-                @Override
-                public void onPlaybackStateChanged(@NonNull PlaybackStateCompat state) {
-                    super.onPlaybackStateChanged(state);
-                    SearchFragment.this.onPlaybackStateChanged(state);
-                }
-            };
-
-    private final MediaBrowserCompat.SubscriptionCallback mSubscriptionCallback =
-            new MediaBrowserCompat.SubscriptionCallback() {
-                @Override
-                public void onChildrenLoaded(@NonNull String parentId,
-                                             @NonNull List<MediaBrowserCompat.MediaItem> children) {
-                    //暂时屏蔽
-//                    try {
-//                        Toast.makeText(get_mActivity(), "fragment onChildrenLoaded, parentId=" + parentId +
-//                                "  count=" + children.size(), Toast.LENGTH_SHORT).show();
-//                        mSearchAdapter.getData().clear();
-//                        for (MediaBrowserCompat.MediaItem item : children) {
-//                            mSearchAdapter.addData(item);
-//                        }
-//                        mSearchAdapter.notifyDataSetChanged();
-//                    } catch (Throwable t) {
-//                        t.printStackTrace();
-//                    }
-                }
-
-                @Override
-                public void onError(@NonNull String id) {
-                    Toast.makeText(getActivity(), "onError", Toast.LENGTH_LONG).show();
-                }
-            };
-
-    private void subscribeData(String mediaId) {
-        mMediaId = mediaId;
-        Logger.t(TAG).d("onClick subscribe");
-        mMediaFragmentListener.getMediaBrowser().unsubscribe(mMediaId);
-        mMediaFragmentListener.getMediaBrowser().subscribe(mMediaId, mSubscriptionCallback);
-
-    }
-
-    protected void showPlaying() {
-        song_play_button.setText(pause);
-        MediaDescriptionCompat descriptionCompat = queueManager.getCurrentItem().getDescription();
-        song_description.setText(String.format("%s - %s", descriptionCompat.getTitle(), descriptionCompat.getSubtitle()));
-        Glide.with(get_mActivity())
-                .load(descriptionCompat.getIconUri())
-                .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                .into(song_cover);
-//        if (rotate != null) {
-//            song_cover.startAnimation(rotate);
-//        } else {
-//            song_cover.setAnimation(rotate);
-//            song_cover.startAnimation(rotate);
-//        }
-        if (objectAnimator.isPaused()) {
-            objectAnimator.resume();
-        } else if (!objectAnimator.isStarted()) {
-            objectAnimator.start();
-        }
-//        objectAnimator.
-    }
 
     private void showStopped() {
         song_play_button.setText(play);
-//        song_cover.clearAnimation();
-        objectAnimator.pause();
-//        objectAnimator.end();
+        pauseAnimation();
     }
 
-//    private List<MusicEntity> convertToMusicEntity(List<SongSearchEntity.DataEntity> dataEntities){
-//        List<MusicEntity> musicEntities = new ArrayList<>(dataEntities.size());
-////        for (S)
-//    }
+    protected void showPlaying(MusicEntity musicEntity, boolean isPlayStart) {
+        if (musicEntity != null) {
+            song_description.setText(String.format("%s - %s", musicEntity.getName(), musicEntity.getSingers().get(0).getName()));
+            Glide.with(get_mActivity())
+                    .load(musicEntity.getCover())
+                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                    .into(song_cover);
+            if (isPlayStart) {
+                song_play_button.setText(pause);
+                playAnimation();
+            }
+        }
+    }
+
+    private void playAnimation() {
+        if (objectAnimator != null) {
+            if (!objectAnimator.isStarted()) {
+                objectAnimator.start();
+            } else if (objectAnimator.isPaused()) {
+                objectAnimator.resume();
+            }
+        }
+    }
+
+    private void pauseAnimation() {
+        if (objectAnimator != null) {
+            if (objectAnimator.isRunning()) {
+                objectAnimator.pause();
+            }
+        }
+    }
+
+    private void playMusic() {
+        MusicManager.getInstance().playMusic();
+    }
+
+    private void pauseMusic() {
+        MusicManager.getInstance().pauseMusic();
+    }
 
     public int[] bubbleSort(int[] sourceArr) {
         int[] arr = Arrays.copyOf(sourceArr, sourceArr.length);

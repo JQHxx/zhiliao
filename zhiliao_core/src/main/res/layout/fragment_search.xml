@@ -42,7 +42,9 @@
         android:paddingTop="8dp" />
 
 
-    <include layout="@layout/controlbar" />
+    <include
+        android:id="@+id/controlbar"
+        layout="@layout/controlbar" />
 
 
 </LinearLayout>

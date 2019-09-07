@@ -126,7 +126,9 @@ public class DetailFragment extends ZhiliaoFragment {
                 }).start();
             }
         }
+//        if (getFragmentManager().findFragmentByTag())
         coverFragment = new CoverFragment();
+
         Bundle arg = coverFragment.getArguments();
 //        MediaControllerCompat controllerCompat = MediaControllerCompat.getMediaController(getActivity());
 //        MediaMetadataCompat metadata = controllerCompat.getMetadata();
@@ -227,5 +229,10 @@ public class DetailFragment extends ZhiliaoFragment {
         output.copyTo(blurTemplate);
 
         return new BitmapDrawable(((Context) Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name())).getResources(), blurTemplate);
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
     }
 }
