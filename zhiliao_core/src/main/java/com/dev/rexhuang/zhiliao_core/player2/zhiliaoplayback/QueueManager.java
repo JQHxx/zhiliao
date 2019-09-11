@@ -177,6 +177,7 @@ public class QueueManager {
         mListener.onQueueUpdated(newQueue);
     }
 
+
     public void updateMetadata() {
         MediaSessionCompat.QueueItem currentMusic = getCurrentMusic();
         if (currentMusic == null) {

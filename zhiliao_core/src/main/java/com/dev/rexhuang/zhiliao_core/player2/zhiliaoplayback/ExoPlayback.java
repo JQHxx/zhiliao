@@ -162,7 +162,7 @@ public final class ExoPlayback implements Playback {
         if (mediaHasChanged || mExoPlayer == null) {
             releaseResources(false);//release everything except the player
             MediaMetadataCompat track = mMusicProvider.getMusic(mediaId);
-
+            //获取要播放的音乐的URL
             String source = track.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI);
             if (TextUtils.isEmpty(source)) {
                 return;

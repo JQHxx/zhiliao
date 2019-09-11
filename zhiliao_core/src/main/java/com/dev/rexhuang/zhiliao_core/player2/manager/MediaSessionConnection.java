@@ -277,6 +277,7 @@ public class MediaSessionConnection {
             super.onSessionDestroyed();
             mediaBrowserConnectionCallback.onConnectionSuspended();
         }
+
     }
 
     /**

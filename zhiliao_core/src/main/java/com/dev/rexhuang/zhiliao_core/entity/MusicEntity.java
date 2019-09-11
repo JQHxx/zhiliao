@@ -1,5 +1,6 @@
 package com.dev.rexhuang.zhiliao_core.entity;
 
+import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -34,6 +35,7 @@ public class MusicEntity implements Parcelable {
     private String hq;
     private Object cover_from;
     private List<SingersEntity> singers;
+    private transient Bitmap coverBitmap;
 
     public String getId() {
         return id;
@@ -207,4 +209,12 @@ public class MusicEntity implements Parcelable {
             return new MusicEntity[size];
         }
     };
+
+    public Bitmap getCoverBitmap() {
+        return coverBitmap;
+    }
+
+    public void setCoverBitmap(Bitmap coverBitmap) {
+        this.coverBitmap = coverBitmap;
+    }
 }

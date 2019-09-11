@@ -15,6 +15,7 @@ public class MainActivity extends ZhiliaoActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String SAVED_MEDIA_ID = "com.dev.rexhuang.zhiliao.MEDIA_ID";
     public static final String MEDIA_ID_KEY = "mediaId";
+    protected ZhiliaoSwitchFragment mZhiliaoSwitchFragment;
 
     private Bundle mSavedInstanceState;
 //    private MainSwitchFragment mainSwitchFragment;

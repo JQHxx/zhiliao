@@ -157,7 +157,7 @@ public class PlaybackManager implements Playback.Callback {
             }
             //设置播放状态
             stateBuilder.setState(state, position, 1.0f, SystemClock.elapsedRealtime());
-            //设置当前活动的 songId
+            //设置当前活动的 musicId
             MediaSessionCompat.QueueItem currentMusic = mQueueManager.getCurrentMusic();
             MediaMetadataCompat currMetadata = null;
             if (currentMusic != null) {

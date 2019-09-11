@@ -5,28 +5,21 @@ import android.view.View;
 
 import com.dev.rexhuang.zhiliao_core.base.BaseFragment;
 import com.dev.rexhuang.zhiliao_core.base.FragmentKeys;
-import com.dev.rexhuang.zhiliao_core.base.ZhiliaoSwitchFragment;
-import com.dev.rexhuang.zhiliao_core.callback.SwitchFragmentListener;
-import com.dev.rexhuang.zhiliao_core.find.FindFragment;
-import com.dev.rexhuang.zhiliao_core.music_hall.MusicHallFragment;
-import com.dev.rexhuang.zhiliao_core.profile.ProfileFragment;
-import com.dev.rexhuang.zhiliao_core.recommend.RecommendFragment;
+import com.dev.rexhuang.zhiliao.find.FindFragment;
+import com.dev.rexhuang.zhiliao.music_hall.MusicHallFragment;
+import com.dev.rexhuang.zhiliao.profile.ProfileFragment;
+import com.dev.rexhuang.zhiliao.recommend.RecommendFragment;
 
-import java.util.LinkedList;
 import java.util.Map;
-import java.util.Objects;
-
-import butterknife.OnClick;
 
 /**
  * *  created by RexHuang
  * *  on 2019/7/26
  */
-public class MainSwitchFragment extends ZhiliaoSwitchFragment implements SwitchFragmentListener {
+public class MainSwitchFragment extends ZhiliaoSwitchFragment {
 
-    private static final LinkedList<String> NAMES = new LinkedList<>();
+    private static final String TAG = MainSwitchFragment.class.getSimpleName();
     private String mediaId;
-    private int mShowPosition = 0;
 
     @Override
     public void onBindView(Bundle savedInstanceState, View view) {
@@ -56,17 +49,7 @@ public class MainSwitchFragment extends ZhiliaoSwitchFragment implements SwitchF
 
     @Override
     public void loadFragments(int containerId) {
-        getSupportDelegate().loadMultipleRootFragment(containerId, mShowPosition, mFragments);
+        getSupportDelegate().loadMultipleRootFragment(containerId, getCurrentFragment(), mFragments);
     }
 
-    @Override
-    public void onSwitchEnd() {
-        mTitleTv.setText((String) Objects.requireNonNull(NAMES.toArray())[getCurrentFragment()]);
-        final int mPreviousIndex = getPreviousFragment();
-        final int mCurrentIndex = getCurrentFragment();
-        sw_ivs[mPreviousIndex].setTextColor(_mActivity.getResources().getColor(R.color.switch_unselected));
-        sw_tvs[mPreviousIndex].setTextColor(_mActivity.getResources().getColor(R.color.switch_unselected));
-        sw_ivs[mCurrentIndex].setTextColor(_mActivity.getResources().getColor(R.color.switch_selected));
-        sw_tvs[mCurrentIndex].setTextColor(_mActivity.getResources().getColor(R.color.switch_selected));
-    }
 }
