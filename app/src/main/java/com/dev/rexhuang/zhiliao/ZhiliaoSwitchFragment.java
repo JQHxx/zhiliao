@@ -4,6 +4,7 @@ import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -25,6 +26,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.dev.rexhuang.zhiliao.detail.DetailActivity;
 import com.dev.rexhuang.zhiliao.detail.DetailFragment;
 import com.dev.rexhuang.zhiliao.find.queue.QueueAdapter;
 import com.dev.rexhuang.zhiliao.search.SearchFragment;
@@ -39,7 +41,9 @@ import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 import com.dev.rexhuang.zhiliao_core.player2.manager.OnPlayerEventListener;
 import com.dev.rexhuang.zhiliao_core.player2.playback.QueueManager;
+import com.dev.rexhuang.zhiliao_core.player2.zhiliaomodel.MusicProvider;
 import com.dev.rexhuang.zhiliao_core.utils.AnimHelper;
+import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.mikepenz.iconics.view.IconicsTextView;
 import com.orhanobut.logger.Logger;
 
@@ -74,10 +78,9 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
 
     //Animator
     private ObjectAnimator cover_play;
-    private float startRotate = 0f;
-    private float endRotate = 360f;
-    private long duration = 10000;
 
+    private BottomSheetDialog queueDialog;
+    private TextView tv_close;
     private QueueAdapter queueAdapter;
     private RecyclerView recyclerView;
     private QueueManager queueManager = QueueManager.getInstance();
@@ -103,48 +106,7 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
 
     @OnClick(R.id.song_list_button)
     void onClickList() {
-        //1、使用Dialog、设置style
-        dialog = new Dialog(get_mActivity(), R.style.DialogTheme);
-        //2、设置布局
-        View view = View.inflate(get_mActivity(), R.layout.dialog_playqueue, null);
-        dialog.setContentView(view);
-
-        Window window = dialog.getWindow();
-        //设置弹出位置
-        window.setGravity(Gravity.BOTTOM);
-        //设置弹出动画
-        window.setWindowAnimations(R.style.main_menu_animStyle);
-        //设置对话框大小
-        final float scale = ((Context) Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name())).getResources().getDisplayMetrics().density;
-        int height = (int) (400 * scale + 0.5f);
-        window.setLayout(ViewGroup.LayoutParams.MATCH_PARENT, height);
-        dialog.show();
-
-        recyclerView = dialog.findViewById(R.id.rcv_songs);
-        recyclerView.setLayoutManager(new LinearLayoutManager(get_mActivity()));
-        queueAdapter = new QueueAdapter(R.layout.item_queue, MusicManager.getInstance().getPlayList());
-        recyclerView.setAdapter(queueAdapter);
-        queueAdapter.bindToRecyclerView(recyclerView);
-        recyclerView.scrollToPosition(MusicManager.getInstance().getNowPlayingIndex());
-//        queueAdapter = new QueueAdapter(R.layout.item_queue, queueManager.getPlayingQueue());
-        queueAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                MusicManager.getInstance().playMusicByIndex(position);
-            }
-        });
-        queueAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
-            @Override
-            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-                if (view.getId() == R.id.iv_more) {
-//                    MusicEntity item = MusicManager.getInstance().getPlayList().get(position);
-//                    MusicProvider.getInstance().
-//                    queueAdapter.notifyItemRemoved(position);
-                }
-            }
-        });
-
-        dialog.show();
+        showQueueDialog();
     }
 
     @OnClick(R.id.song_play_button)
@@ -182,21 +144,13 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
     @OnClick(R.id.controlbar)
     void onClickControl() {
         MusicEntity musicEntity = MusicManager.getInstance().getNowPlayingSongInfo();
-        DetailFragment detailFragment;
-        if ((detailFragment = SupportHelper.findFragment(getFragmentManager(), DetailFragment.class)) == null) {
-            detailFragment = DetailFragment.newInstance(
-                    musicEntity != null ? musicEntity.getId() : null,
-                    musicEntity != null ? song_cover.getRotation() : 0f, MainSwitchFragment.class.getSimpleName());
-            getSupportDelegate().start(detailFragment, ISupportFragment.SINGLETASK);
-        } else {
-            Bundle args = detailFragment.getArguments() == null ? new Bundle() : detailFragment.getArguments();
-            if (musicEntity != null) {
-                args.putString(BaseActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION, musicEntity.getId());
-                args.putFloat(BaseActivity.EXTRA_CURRENT_MEDIA_ROTATION, song_cover.getRotation());
-                args.putString(BaseActivity.FRGMENT_FROM, MainSwitchFragment.class.getSimpleName());
-                detailFragment.setArguments(args);
-            }
-            ((ISupportActivity) get_mActivity()).getSupportDelegate().showHideFragment(detailFragment, this);
+        if (musicEntity != null) {
+            Intent intent = new Intent(getActivity(), DetailActivity.class);
+            intent.putExtra(BaseActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION, musicEntity != null ? musicEntity.getId() : null);
+            intent.putExtra(BaseActivity.EXTRA_CURRENT_MEDIA_ROTATION, musicEntity != null ? song_cover.getRotation() : 0f);
+            intent.putExtra(BaseActivity.FRGMENT_FROM, MainSwitchFragment.class.getSimpleName());
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+            getActivity().startActivity(intent);
         }
     }
 
@@ -286,6 +240,7 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
             public void onMusicSwitch(MusicEntity musicEntity) {
                 showPlaying(musicEntity, false);
                 if (queueAdapter != null) {
+                    queueAdapter.setNewData(MusicManager.getInstance().getPlayList());
                     queueAdapter.notifyDataSetChanged();
                 }
             }
@@ -370,6 +325,47 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
         sw_tvs[mCurrentIndex].setTextColor(_mActivity.getResources().getColor(R.color.switch_selected));
     }
 
+    private void showQueueDialog() {
+        if (queueDialog == null) {
+            queueAdapter = new QueueAdapter(R.layout.item_queue, MusicManager.getInstance().getPlayList());
+            queueDialog = QueueDialogHelper.createQueueDialog(getActivity());
+            tv_close = queueDialog.findViewById(R.id.tv_close);
+            recyclerView = queueDialog.findViewById(R.id.rcv_songs);
+            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
+            recyclerView.setAdapter(queueAdapter);
+            tv_close.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    hideQueueDialog();
+                }
+            });
+            queueAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
+                @Override
+                public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                    MusicManager.getInstance().playMusicByIndex(position);
+
+                }
+            });
+            queueAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
+                @Override
+                public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
+                    if (view.getId() == R.id.iv_more) {
+                    }
+                }
+            });
+        }
+        if (MusicManager.getInstance().getNowPlayingIndex() >= 0) {
+            recyclerView.scrollToPosition(MusicManager.getInstance().getNowPlayingIndex());
+        }
+        queueDialog.show();
+    }
+
+    private void hideQueueDialog() {
+        if (queueDialog != null) {
+            queueDialog.hide();
+        }
+    }
+
     private void showStopped() {
         song_play_button.setText(play);
         pauseAnimation();
@@ -381,6 +377,8 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
             Glide.with(get_mActivity())
                     .load(musicEntity.getCover())
                     .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                    .placeholder(R.drawable.diskte)
+                    .error(R.drawable.disk)
                     .into(song_cover);
             if (isPlayStart) {
                 song_play_button.setText(pause);

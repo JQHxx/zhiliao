@@ -38,8 +38,10 @@ public class RestCreator {
 
     private static final class OkHttpHolder {
         private static final int TIME_OUT = 60;
+        private static final LoggingInterceptor interceptor = new LoggingInterceptor();
         private static final OkHttpClient OK_HTTP_CLIENT = new OkHttpClient.Builder()
                 .connectTimeout(TIME_OUT, TimeUnit.SECONDS)
+                .addInterceptor(interceptor)  //设置打印拦截日志
                 .build();
     }
 

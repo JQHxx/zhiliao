@@ -2,8 +2,11 @@ package com.dev.rexhuang.zhiliao.music_hall;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import com.dev.rexhuang.zhiliao.R;
+import com.dev.rexhuang.zhiliao.event.MessageEvent;
+import com.dev.rexhuang.zhiliao.event.MusicHallEvent;
 import com.dev.rexhuang.zhiliao_core.api.ZhiliaoApi;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoMainFragment;
 import com.dev.rexhuang.zhiliao_core.entity.SongListEntity;
@@ -12,6 +15,7 @@ import com.dev.rexhuang.zhiliao.music_hall.adapter.MultipleItemsCreator;
 import com.dev.rexhuang.zhiliao.music_hall.adapter.MultipleRecyclerAdapter;
 import com.dev.rexhuang.zhiliao.music_hall.adapter.SongListAdapter;
 import com.dev.rexhuang.zhiliao_core.net.callback.ISuccess;
+import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +23,11 @@ import java.util.List;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
 
@@ -29,9 +38,13 @@ import butterknife.BindView;
 public class MusicHallFragment extends ZhiliaoMainFragment {
 
     public static final String TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMTcyOTExIiwiZXhwIjoxNTkzOTY0MDQ5LCJpYXQiOjE1NjI4NjAwNDl9.d9f_6ikO6gDD5Dcra7nxSzkzI8lP6vI4UI4SR32aiRU";
+    private MultipleItemsCreator creator;
 
     @BindView(R.id.rv_music_hall)
     RecyclerView rv_music_hall;
+
+    @BindView(R.id.swipe_layout)
+    SwipeRefreshLayout swipe_layout;
 
     //    @BindView(R2.id.rv_song_list)
     //    RecyclerView rv_song_list;
@@ -69,9 +82,26 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
             @Override
             public void onSuccess(SongListEntity songListEntity) {
                 MusicHallFragment.this.songListEntity = songListEntity;
-                MultipleItemsCreator creator = new MultipleItemsCreator(MusicHallFragment.this.songListEntity.getData(), imagesArray);
-                MusicHallFragment.this.multipleRecyclerAdapter = new MultipleRecyclerAdapter(_mActivity, creator.create());
+                creator = new MultipleItemsCreator(MusicHallFragment.this.songListEntity.getData(), imagesArray);
+                multipleRecyclerAdapter = new MultipleRecyclerAdapter(_mActivity, creator.create());
                 rv_music_hall.setAdapter(multipleRecyclerAdapter);
+            }
+        }, null, null);
+        swipe_layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                Logger.d("onRefresh");
+                refreshUI();
+            }
+        });
+    }
+
+    private void refreshUI() {
+        ZhiliaoApi.musicbillList(TOKEN, null, new ISuccess<SongListEntity>() {
+            @Override
+            public void onSuccess(SongListEntity songListEntity) {
+                MusicHallFragment.this.songListEntity = songListEntity;
+                EventBus.getDefault().post(new MusicHallEvent(songListEntity.getData()));
             }
         }, null, null);
     }
@@ -86,5 +116,25 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMessageEvent(MusicHallEvent event) {
+        creator.setDataEntity(event.dataEntities);
+        multipleRecyclerAdapter.setNewData(creator.create());
+        multipleRecyclerAdapter.notifyDataSetChanged();
+        swipe_layout.setRefreshing(false);
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        EventBus.getDefault().register(this);
+    }
+
+    @Override
+    public void onStop() {
+        EventBus.getDefault().unregister(this);
+        super.onStop();
     }
 }

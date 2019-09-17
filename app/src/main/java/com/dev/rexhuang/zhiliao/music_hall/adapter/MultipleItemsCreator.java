@@ -35,6 +35,7 @@ public class MultipleItemsCreator {
         if (dataEntity == null) {
             throw new RuntimeException("SongListEntity.DataEntity dataEntity is not ready,call setDataEntity");
         }
+        multipleItemEntities.clear();
         MultipleItemEntity bannerItem = new MultipleItemEntity();
         bannerItem.setField(MultipleItemType.ITEM_TYPE, MultipleItemType.BANNER.ordinal());
         bannerItem.setField(MultipleItemType.BANNER, imagesArray);

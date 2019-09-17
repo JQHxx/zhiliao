@@ -3,13 +3,14 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/toolbar"
+    tools:context=".detail.DetailActivity">
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/iv_bg_detail"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:background="@color/toolbar"
         android:scaleType="centerCrop"
         android:transitionName="" />
 
@@ -26,14 +27,10 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/dp_10"
-
-        android:fitsSystemWindows="true"
         app:layout_constraintBottom_toTopOf="@+id/tv_singer_name"
         app:layout_constraintEnd_toStartOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-
-        app:layout_constraintTop_toTopOf="parent"
-        app:title="">
+        app:layout_constraintTop_toTopOf="parent">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -74,8 +71,10 @@
                     android:gravity="center"
                     android:marqueeRepeatLimit="marquee_forever"
                     android:singleLine="true"
+                    android:text="歌曲名"
                     android:textColor="@color/white"
                     android:textSize="@dimen/sp_18"
+                    tools:ignore="HardcodedText"
                     tools:text="歌曲名" />
             </LinearLayout>
 
@@ -102,11 +101,13 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:lines="1"
+        android:text="-  歌手  -"
         android:textColor="#8affffff"
         android:textSize="@dimen/sp_14"
         app:layout_constraintEnd_toEndOf="@+id/toolbar_detail"
         app:layout_constraintStart_toStartOf="@+id/toolbar_detail"
         app:layout_constraintTop_toBottomOf="@+id/toolbar_detail"
+        tools:ignore="HardcodedText"
         tools:text="- 周杰伦 -" />
 
     <LinearLayout
@@ -121,7 +122,8 @@
             android:id="@+id/viewPager"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:overScrollMode="never" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -178,11 +180,12 @@
                     android:maxHeight="2dp"
                     android:progress="0"
                     android:secondaryProgress="0"
-                    android:tag="tint_accent_color" />
+                    android:tag="tint_accent_color"
+                    android:thumbTint="@color/white" />
 
 
                 <TextView
-                    android:id="@+id/durationTv"
+                    android:id="@+id/tv_duration"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="20dp"
@@ -204,6 +207,7 @@
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_repeat" />
 
                 <ImageView
@@ -213,6 +217,7 @@
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_prev" />
 
                 <ImageView
@@ -223,6 +228,7 @@
                     android:layout_margin="@dimen/dp_8"
                     android:layout_weight="1"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_detail_play" />
 
                 <ImageView
@@ -232,6 +238,7 @@
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_next" />
 
                 <ImageView
@@ -241,6 +248,7 @@
                     android:layout_gravity="center"
                     android:layout_weight="1"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@null"
                     android:scaleType="center"
                     android:src="@drawable/ic_detail_queue" />
 
@@ -261,6 +269,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_collect" />
 
                 <ImageView
@@ -270,6 +279,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_download" />
 
                 <ImageView
@@ -279,6 +289,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_share" />
 
                 <ImageView
@@ -288,6 +299,7 @@
                     android:layout_gravity="center_vertical"
                     android:layout_weight="1"
                     android:background="?android:attr/selectableItemBackgroundBorderless"
+                    android:contentDescription="@null"
                     android:src="@drawable/ic_comments1" />
             </LinearLayout>
 

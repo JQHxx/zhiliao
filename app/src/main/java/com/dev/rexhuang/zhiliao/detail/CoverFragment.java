@@ -117,10 +117,17 @@ public class CoverFragment extends Fragment {
         }
     }
 
-    private void stopAnimation() {
+    public void stopAnimation() {
         if (cover_play != null) {
             cover_play.cancel();
         }
+    }
+
+    public void resetAnimation() {
+        stopAnimation();
+        cover_play = AnimHelper.rotate(civ_cover, "rotation", AnimHelper.DEFAULT_START_ROTATE,
+                AnimHelper.DEFAULT_END_ROTATE, AnimHelper.DEFAULT_DURATION,
+                ValueAnimator.INFINITE, ValueAnimator.RESTART);
     }
 
     @Override

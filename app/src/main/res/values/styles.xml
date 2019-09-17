@@ -12,4 +12,16 @@
         <item name="android:windowFullscreen">true</item>
     </style>
 
+    <style name="BottomSheetDialogStyle" parent="Theme.Design.BottomSheetDialog">
+        <!-- 边框 -->
+        <item name="android:windowFrame">@null</item>
+        <!-- 是否浮现在activity之上 -->
+        <item name="android:windowIsFloating">true</item>
+        <!-- 半透明 -->
+        <item name="android:windowIsTranslucent">true</item>
+        <!-- 无标题 -->
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:background">@android:color/transparent</item>
+    </style>
+
 </resources>

@@ -11,7 +11,7 @@ public class AnimHelper {
 
     public static final float DEFAULT_START_ROTATE = 0f;
     public static final float DEFAULT_END_ROTATE = 360f;
-    public static final long DEFAULT_DURATION = 100000;
+    public static final long DEFAULT_DURATION = 80000;
 
     public static ObjectAnimator rotate(Object target, String propertyName, float startRotate, float endRotate, long duration, int repeatCount, int repeatMode) {
         ObjectAnimator objectAnimator = ObjectAnimator.ofFloat(target, propertyName, startRotate, endRotate)

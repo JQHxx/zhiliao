@@ -18,7 +18,7 @@
             android:id="@+id/song_description"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_marginStart="60dp"
+            android:layout_marginStart="@dimen/dp_70"
             android:layout_weight="5"
             android:gravity="start|center_vertical"
             android:text="知了音乐 让生活充满音乐"
@@ -51,5 +51,5 @@
         android:layout_width="45dp"
         android:layout_height="45dp"
         android:layout_marginStart="@dimen/dp_10"
-        android:src="@drawable/disk" />
+        android:src="@drawable/diskte" />
 </FrameLayout>

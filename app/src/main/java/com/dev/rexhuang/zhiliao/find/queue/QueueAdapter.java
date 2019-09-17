@@ -1,6 +1,7 @@
 package com.dev.rexhuang.zhiliao.find.queue;
 
 import android.graphics.Color;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -32,11 +33,13 @@ public class QueueAdapter extends BaseQuickAdapter<MusicEntity, BaseViewHolder> 
         //选中正在播放的歌曲
         if (MusicManager.getInstance().getNowPlayingSongInfo().getId() == item.getId() && MusicManager.getInstance().getNowPlayingIndex() == helper.getAdapterPosition()) {
             index = helper.getAdapterPosition();
-            helper.setTextColor(R.id.tv_title, Color.parseColor("#0091EA"));
-            helper.setTextColor(R.id.tv_artist, Color.parseColor("#01579B"));
+            helper.setTextColor(R.id.tv_title, Color.parseColor("#27FDB9"));
+            helper.setTextColor(R.id.tv_artist, Color.parseColor("#27FDB9"));
+            helper.setVisible(R.id.iv_listening, true);
         } else {
-            helper.setTextColor(R.id.tv_title, Color.parseColor("#ffffff"));
+            helper.setTextColor(R.id.tv_title, Color.parseColor("#FFFFFF"));
             helper.setTextColor(R.id.tv_artist, Color.parseColor("#9e9e9e"));
+            helper.setVisible(R.id.iv_listening, false);
         }
         helper.addOnClickListener(R.id.iv_more);
     }

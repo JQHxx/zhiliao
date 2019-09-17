@@ -24,6 +24,7 @@ import me.yokeyword.fragmentation.anim.FragmentAnimator;
  * *  on 2019/7/26
  */
 public abstract class BaseFragment extends Fragment implements ISupportFragment {
+
     public abstract Object setLayout();
 
     final SupportFragmentDelegate mDelegate = new SupportFragmentDelegate(this);

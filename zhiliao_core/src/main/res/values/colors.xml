@@ -20,4 +20,5 @@
     <color name="translucent_white">#80FFFFFF</color>
     <color name="searchbar">#222739</color>
     <color name="searchbar_edit_layout">#2F3346</color>
+    <color name="queue_dialog">#1C222C</color>
 </resources>
