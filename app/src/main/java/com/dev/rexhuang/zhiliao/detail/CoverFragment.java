@@ -100,6 +100,7 @@ public class CoverFragment extends Fragment {
     }
 
     public void playAnimation() {
+        Logger.d("playAnimation");
         if (cover_play != null) {
             if (!cover_play.isStarted()) {
                 cover_play.start();

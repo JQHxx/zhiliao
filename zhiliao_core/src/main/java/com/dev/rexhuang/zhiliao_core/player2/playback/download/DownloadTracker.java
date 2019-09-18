@@ -1,4 +1,4 @@
-package com.dev.rexhuang.zhiliao_core.player2.zhiliaoplayback.download;
+package com.dev.rexhuang.zhiliao_core.player2.playback.download;
 
 import android.content.Context;
 import android.net.Uri;

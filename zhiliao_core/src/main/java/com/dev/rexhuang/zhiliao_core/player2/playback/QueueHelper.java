@@ -1,4 +1,4 @@
-package com.dev.rexhuang.zhiliao_core.player2.zhiliaoplayback;
+package com.dev.rexhuang.zhiliao_core.player2.playback;
 
 import android.app.Activity;
 import android.support.v4.media.MediaMetadataCompat;
@@ -6,7 +6,7 @@ import android.support.v4.media.session.MediaControllerCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.text.TextUtils;
 
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaomodel.MusicProvider;
+import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
 
 import java.util.ArrayList;
 import java.util.List;

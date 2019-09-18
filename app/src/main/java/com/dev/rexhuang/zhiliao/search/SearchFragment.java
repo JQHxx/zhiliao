@@ -2,7 +2,6 @@ package com.dev.rexhuang.zhiliao.search;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -38,7 +37,7 @@ import com.dev.rexhuang.zhiliao_core.entity.SongSearchEntity;
 import com.dev.rexhuang.zhiliao_core.net.callback.ISuccess;
 import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 import com.dev.rexhuang.zhiliao_core.player2.manager.OnPlayerEventListener;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaomodel.MusicProvider;
+import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
 import com.dev.rexhuang.zhiliao_core.utils.AnimHelper;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.mikepenz.iconics.view.IconicsTextView;
@@ -181,7 +180,7 @@ public class SearchFragment extends ZhiliaoFragment {
                         .into(song_cover);
             }
             if (MusicManager.getInstance().isPlaying()) {
-                showPlaying(musicEntity, true);
+                showPlaying(musicEntity, true, true);
             }
         }
         mSearchAdapter = new SearchAdapter(R.layout.item_music, new ArrayList<>());
@@ -223,7 +222,7 @@ public class SearchFragment extends ZhiliaoFragment {
             @Override
             public void onMusicSwitch(MusicEntity musicEntity) {
                 if (musicEntity != null) {
-                    showPlaying(musicEntity, false);
+                    showPlaying(musicEntity, false, true);
                     if (queueAdapter != null) {
                         queueAdapter.setNewData(MusicManager.getInstance().getPlayList());
                         queueAdapter.notifyDataSetChanged();
@@ -233,8 +232,9 @@ public class SearchFragment extends ZhiliaoFragment {
 
             @Override
             public void onPlayerStart() {
-                song_play_button.setText(pause);
-                playAnimation();
+                showPlaying(MusicManager.getInstance().getNowPlayingSongInfo(), true, false);
+//                song_play_button.setText(pause);
+//                playAnimation();
             }
 
             @Override
@@ -261,6 +261,11 @@ public class SearchFragment extends ZhiliaoFragment {
             public void onError(int errorCode, String errorMsg) {
                 Toast.makeText(get_mActivity(), "播放出错!!", Toast.LENGTH_SHORT).show();
             }
+
+            @Override
+            public void onRepeatModeChanged(int repeatMode) {
+                Toast.makeText(get_mActivity(), "模式变成 : " + repeatMode, Toast.LENGTH_SHORT).show();
+            }
         };
         MusicManager.getInstance().addPlayerEventListener(onPlayerEventListener);
 
@@ -283,13 +288,18 @@ public class SearchFragment extends ZhiliaoFragment {
         pauseAnimation();
     }
 
-    private void showPlaying(MusicEntity musicEntity, boolean isPlayStart) {
+    private void showPlaying(MusicEntity musicEntity, boolean isPlayStart, boolean isMusicSwitch) {
         if (musicEntity != null) {
-            song_description.setText(String.format("%s - %s", musicEntity.getName(), musicEntity.getSingers().get(0).getName()));
-            Glide.with(get_mActivity())
-                    .load(musicEntity.getCover())
-                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                    .into(song_cover);
+            if (isMusicSwitch) {
+                song_description.setText(String.format("%s - %s", musicEntity.getName(), musicEntity.getSingers().get(0).getName()));
+                Glide.with(get_mActivity())
+                        .load(musicEntity.getCover())
+                        .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                        .placeholder(R.drawable.diskte)
+                        .error(R.drawable.diskte)
+                        .into(song_cover);
+                resetAnimation();
+            }
             if (isPlayStart) {
                 song_play_button.setText(pause);
                 playAnimation();
@@ -318,6 +328,15 @@ public class SearchFragment extends ZhiliaoFragment {
     private void stopAnimation() {
         if (cover_play != null) {
             cover_play.cancel();
+        }
+    }
+
+    private void resetAnimation() {
+        if (cover_play != null) {
+            stopAnimation();
+            cover_play = AnimHelper.rotate(song_cover, "rotation", AnimHelper.DEFAULT_START_ROTATE,
+                    AnimHelper.DEFAULT_END_ROTATE, AnimHelper.DEFAULT_DURATION,
+                    ValueAnimator.INFINITE, ValueAnimator.RESTART);
         }
     }
 

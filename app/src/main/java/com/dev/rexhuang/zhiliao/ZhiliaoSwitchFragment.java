@@ -2,17 +2,11 @@ package com.dev.rexhuang.zhiliao;
 
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
-import android.app.Dialog;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.view.Gravity;
 import android.view.View;
-import android.view.ViewGroup;
-import android.view.Window;
-import android.view.animation.LinearInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -27,7 +21,6 @@ import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.dev.rexhuang.zhiliao.detail.DetailActivity;
-import com.dev.rexhuang.zhiliao.detail.DetailFragment;
 import com.dev.rexhuang.zhiliao.find.queue.QueueAdapter;
 import com.dev.rexhuang.zhiliao.search.SearchFragment;
 import com.dev.rexhuang.zhiliao_core.base.BaseActivity;
@@ -35,13 +28,9 @@ import com.dev.rexhuang.zhiliao_core.base.BaseFragment;
 import com.dev.rexhuang.zhiliao_core.base.FragmentKeys;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoFragment;
 import com.dev.rexhuang.zhiliao_core.callback.SwitchFragmentListener;
-import com.dev.rexhuang.zhiliao_core.config.ConfigKeys;
-import com.dev.rexhuang.zhiliao_core.config.Zhiliao;
 import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 import com.dev.rexhuang.zhiliao_core.player2.manager.OnPlayerEventListener;
-import com.dev.rexhuang.zhiliao_core.player2.playback.QueueManager;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaomodel.MusicProvider;
 import com.dev.rexhuang.zhiliao_core.utils.AnimHelper;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.mikepenz.iconics.view.IconicsTextView;
@@ -83,8 +72,6 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
     private TextView tv_close;
     private QueueAdapter queueAdapter;
     private RecyclerView recyclerView;
-    private QueueManager queueManager = QueueManager.getInstance();
-    private Dialog dialog;
     private OnPlayerEventListener onPlayerEventListener;
     private SwitchHandler handler = new SwitchHandler(this);
     private static final int UPDATE_QUEUE = 102000000;
@@ -238,7 +225,7 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
         onPlayerEventListener = new OnPlayerEventListener() {
             @Override
             public void onMusicSwitch(MusicEntity musicEntity) {
-                showPlaying(musicEntity, false);
+                showPlaying(musicEntity, false, true);
                 if (queueAdapter != null) {
                     queueAdapter.setNewData(MusicManager.getInstance().getPlayList());
                     queueAdapter.notifyDataSetChanged();
@@ -247,8 +234,9 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
 
             @Override
             public void onPlayerStart() {
-                song_play_button.setText(pause);
-                playAnimation();
+                showPlaying(MusicManager.getInstance().getNowPlayingSongInfo(), true, false);
+//                song_play_button.setText(pause);
+//                playAnimation();
             }
 
             @Override
@@ -274,6 +262,11 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
             @Override
             public void onError(int errorCode, String errorMsg) {
                 Toast.makeText(get_mActivity(), "播放出错!!", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onRepeatModeChanged(int repeatMode) {
+                Toast.makeText(get_mActivity(), "模式变成 : " + repeatMode, Toast.LENGTH_SHORT).show();
             }
         };
         MusicManager.getInstance().addPlayerEventListener(onPlayerEventListener);
@@ -371,15 +364,18 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
         pauseAnimation();
     }
 
-    protected void showPlaying(MusicEntity musicEntity, boolean isPlayStart) {
+    protected void showPlaying(MusicEntity musicEntity, boolean isPlayStart, boolean isMusicSwitch) {
         if (musicEntity != null) {
-            song_description.setText(String.format("%s - %s", musicEntity.getName(), musicEntity.getSingers().get(0).getName()));
-            Glide.with(get_mActivity())
-                    .load(musicEntity.getCover())
-                    .apply(RequestOptions.bitmapTransform(new CircleCrop()))
-                    .placeholder(R.drawable.diskte)
-                    .error(R.drawable.disk)
-                    .into(song_cover);
+            if (isMusicSwitch) {
+                song_description.setText(String.format("%s - %s", musicEntity.getName(), musicEntity.getSingers().get(0).getName()));
+                Glide.with(get_mActivity())
+                        .load(musicEntity.getCover())
+                        .apply(RequestOptions.bitmapTransform(new CircleCrop()))
+                        .placeholder(R.drawable.diskte)
+                        .error(R.drawable.diskte)
+                        .into(song_cover);
+                resetAnimation();
+            }
             if (isPlayStart) {
                 song_play_button.setText(pause);
                 playAnimation();
@@ -408,6 +404,15 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
     private void stopAnimation() {
         if (cover_play != null) {
             cover_play.cancel();
+        }
+    }
+
+    private void resetAnimation() {
+        if (cover_play != null) {
+            stopAnimation();
+            cover_play = AnimHelper.rotate(song_cover, "rotation", AnimHelper.DEFAULT_START_ROTATE,
+                    AnimHelper.DEFAULT_END_ROTATE, AnimHelper.DEFAULT_DURATION,
+                    ValueAnimator.INFINITE, ValueAnimator.RESTART);
         }
     }
 

@@ -12,7 +12,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 
 import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 import com.dev.rexhuang.zhiliao_core.player2.MusicService;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaomodel.MusicProvider;
+import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -278,6 +278,15 @@ public class MediaSessionConnection {
             mediaBrowserConnectionCallback.onConnectionSuspended();
         }
 
+        @Override
+        public void onRepeatModeChanged(int repeatMode) {
+            super.onRepeatModeChanged(repeatMode);
+            //状态监听
+            CopyOnWriteArrayList<OnPlayerEventListener> mPlayerEventListeners = MusicManager.getInstance().getPlayerEventListeners();
+            for (OnPlayerEventListener listener : mPlayerEventListeners) {
+                listener.onRepeatModeChanged(repeatMode);
+            }
+        }
     }
 
     /**

@@ -10,7 +10,6 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.find.adapter.SearchAdapter;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoMainFragment;
-import com.dev.rexhuang.zhiliao_core.player2.playback.QueueManager;
 
 import java.util.ArrayList;
 
@@ -50,19 +49,16 @@ public class FindFragment extends ZhiliaoMainFragment {
 
     @OnClick(R.id.next_btn)
     void onClickNext() {
-        QueueManager.getInstance().next();
     }
 
     @OnClick(R.id.previous_btn)
     void onClickPre() {
-        QueueManager.getInstance().previous();
     }
 
     @OnClick(R.id.test_mode_btn)
     void onClickMode() {
         modeIndex = modeIndex < 2 ? modeIndex + 1 : 0;
         test_mode_btn.setText(testMode[modeIndex]);
-        QueueManager.getInstance().setPlayMode(modeIndex);
 
     }
 

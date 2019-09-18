@@ -40,4 +40,9 @@ public interface OnPlayerEventListener {
      * 发生错误
      */
     void onError(int errorCode, String errorMsg);
+
+    /**
+     * 歌单模式改变
+     */
+    void onRepeatModeChanged(int repeatMode);
 }

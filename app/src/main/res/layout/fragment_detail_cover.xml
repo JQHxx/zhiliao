@@ -76,7 +76,7 @@
             android:layout_marginEnd="30dp"
             android:layout_marginRight="30dp"
             android:elevation="10dp"
-            android:src="@drawable/default_cover"
+            android:src="@drawable/diskte"
             app:civ_border_color="@color/white" />
 
         <de.hdodenhof.circleimageview.CircleImageView

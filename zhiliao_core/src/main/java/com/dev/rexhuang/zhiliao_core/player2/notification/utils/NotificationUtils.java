@@ -16,7 +16,7 @@ import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 import com.dev.rexhuang.zhiliao_core.player2.MusicService;
 import com.dev.rexhuang.zhiliao_core.player2.notification.NotificationConstructor;
 import com.dev.rexhuang.zhiliao_core.player2.notification.factory.INotification;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaomodel.MusicProvider;
+import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
 
 import java.util.List;
 

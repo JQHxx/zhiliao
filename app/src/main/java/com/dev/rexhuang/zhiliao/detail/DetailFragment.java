@@ -15,10 +15,10 @@ import android.renderscript.Allocation;
 import android.renderscript.Element;
 import android.renderscript.RenderScript;
 import android.renderscript.ScriptIntrinsicBlur;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.View;
 import android.widget.CheckedTextView;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,21 +38,19 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.target.SimpleTarget;
 import com.bumptech.glide.request.target.Target;
 import com.bumptech.glide.request.transition.Transition;
-import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.dev.rexhuang.zhiliao.QueueDialogHelper;
 import com.dev.rexhuang.zhiliao.R;
-import com.dev.rexhuang.zhiliao.TimeHelper;
-import com.dev.rexhuang.zhiliao.TimerTaskManager;
 import com.dev.rexhuang.zhiliao.find.queue.QueueAdapter;
+import com.dev.rexhuang.zhiliao.timer.TimeHelper;
+import com.dev.rexhuang.zhiliao.timer.TimerTaskManager;
 import com.dev.rexhuang.zhiliao_core.base.BaseActivity;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoFragment;
-import com.dev.rexhuang.zhiliao_core.bean.Music;
 import com.dev.rexhuang.zhiliao_core.config.ConfigKeys;
 import com.dev.rexhuang.zhiliao_core.config.Zhiliao;
 import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 import com.dev.rexhuang.zhiliao_core.player2.manager.OnPlayerEventListener;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaomodel.MusicProvider;
+import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.orhanobut.logger.Logger;
 import com.youth.banner.transformer.DepthPageTransformer;
@@ -72,21 +70,32 @@ public class DetailFragment extends ZhiliaoFragment {
 
     private static final String TAG = DetailFragment.class.getSimpleName();
     private MyRunnable myRunnable;
+
+    //Arguments存储变量
     private Bundle args;
     private float currentRotation;
     private MusicEntity currentMusicEntity;
+
+    //播放器回调
     private OnPlayerEventListener onPlayerEventListener;
 
+    //子Fragment
     private CoverFragment coverFragment;
     private LyricFragment lyricFragment;
+
+    //时间
     private TimerTaskManager mTimeTaskManager;
 
-    //PlayQueue
+    //PlayQueueDialog
     private BottomSheetDialog queueDialog;
-    //    private Dialog queueDialog;
     private RecyclerView recyclerView;
     private QueueAdapter queueAdapter;
     private TextView tv_close;
+    private TextView tv_play_mode;
+    private ImageView iv_play_mode;
+
+    private String[] play_mode_text;
+    private Drawable[] play_mode_drawable;
 
     @BindView(R.id.iv_play_pause)
     ImageView iv_play_pause;
@@ -118,9 +127,12 @@ public class DetailFragment extends ZhiliaoFragment {
     @BindView(R.id.tv_duration)
     TextView tv_duration;
 
+    @BindView(R.id.iv_playmode)
+    ImageView iv_playmode;
+
+    @SuppressWarnings("ConstantConditions")
     @OnClick(R.id.iv_detail_back)
     void onClickBack() {
-//        onBackPressedSupport();
         getActivity().finish();
     }
 
@@ -166,6 +178,11 @@ public class DetailFragment extends ZhiliaoFragment {
         return detailFragment;
     }
 
+    @OnClick(R.id.iv_playmode)
+    void onClickMode() {
+        nextMode();
+    }
+
     @Override
     public Object setLayout() {
         return R.layout.fragment_detail;
@@ -173,6 +190,23 @@ public class DetailFragment extends ZhiliaoFragment {
 
     @Override
     public void onBindView(Bundle savedInstanceState, View view) {
+        getArgumentsInfo();
+        initViewPager();
+        initPlayEventListener();
+        initProgressBar();
+        checkMusicManager();
+    }
+
+    @Override
+    public void onAttach(@NonNull Context context) {
+        super.onAttach(context);
+        play_mode_text = getActivity().getResources().getStringArray(R.array.play_mode_text);
+        play_mode_drawable = new Drawable[]{getActivity().getDrawable(R.drawable.ic_order),
+                getActivity().getDrawable(R.drawable.ic_repeat),
+                getActivity().getDrawable(R.drawable.ic_loop)};
+    }
+
+    private void getArgumentsInfo() {
         args = getArguments();
         if (args != null) {
             String musicId = args.getString(BaseActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION) == null ?
@@ -192,26 +226,34 @@ public class DetailFragment extends ZhiliaoFragment {
                 }
             }
         }
+    }
 
-        initViewPager();
-        initPlayEventListener();
-        initProgressBar();
+    private void checkMusicManager() {
+        switch (MusicManager.getInstance().getRepeatMode()) {
+            case PlaybackStateCompat.REPEAT_MODE_NONE:
+                iv_playmode.setImageDrawable(play_mode_drawable[0]);
+                break;
+            case PlaybackStateCompat.REPEAT_MODE_ONE:
+                iv_playmode.setImageDrawable(play_mode_drawable[1]);
+                break;
+            case PlaybackStateCompat.REPEAT_MODE_ALL:
+                iv_playmode.setImageDrawable(play_mode_drawable[2]);
+                break;
+        }
         if (MusicManager.getInstance().isPlaying()) {
-            showPlaying(currentMusicEntity, true, false);
+            showPlaying(currentMusicEntity, true, true);
             mTimeTaskManager.startToUpdateProgress();
         }
     }
 
+    @SuppressWarnings("ConstantConditions")
     private void initProgressBar() {
         sb_progress.setProgressDrawable(getActivity().getDrawable(R.drawable.progress));
         setProgressBar();
         mTimeTaskManager = new TimerTaskManager();
-        mTimeTaskManager.setUpdateProgressTask(new Runnable() {
-            @Override
-            public void run() {
-                setProgressBar();
-                setLyric();
-            }
+        mTimeTaskManager.setUpdateProgressTask(() -> {
+            setProgressBar();
+            setLyric();
         });
         sb_progress.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -270,8 +312,6 @@ public class DetailFragment extends ZhiliaoFragment {
 
             @Override
             public void onPlayerStart() {
-//                iv_play_pause.setImageResource(R.drawable.ic_detail_pause);
-//                playAnimation();
                 showPlaying(MusicManager.getInstance().getNowPlayingSongInfo(), true, false);
                 mTimeTaskManager.startToUpdateProgress();
             }
@@ -303,6 +343,11 @@ public class DetailFragment extends ZhiliaoFragment {
             public void onError(int errorCode, String errorMsg) {
                 Toast.makeText(get_mActivity(), "播放出错!!", Toast.LENGTH_SHORT).show();
                 mTimeTaskManager.stopToUpdateProgress();
+            }
+
+            @Override
+            public void onRepeatModeChanged(int repeatMode) {
+                Toast.makeText(get_mActivity(), "模式变成 : " + repeatMode, Toast.LENGTH_SHORT).show();
             }
         };
         MusicManager.getInstance().addPlayerEventListener(onPlayerEventListener);
@@ -365,9 +410,6 @@ public class DetailFragment extends ZhiliaoFragment {
 
     /**
      * 图片渐变切换动画
-     *
-     * @param imageView
-     * @param bitmapDrawable
      */
     public void startChangeAnimation(ImageView imageView, Drawable bitmapDrawable) {
         Drawable oldDrawable = imageView.getDrawable();
@@ -390,7 +432,7 @@ public class DetailFragment extends ZhiliaoFragment {
     /**
      * @param inSampleSize 图片像素的 1/n*n
      */
-    public static Drawable createBlurredImageFromBitmap(Bitmap bitmap, int inSampleSize) {
+    private static Drawable createBlurredImageFromBitmap(Bitmap bitmap, int inSampleSize) {
 
         RenderScript rs = RenderScript.create(Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name()));
         final BitmapFactory.Options options = new BitmapFactory.Options();
@@ -415,26 +457,22 @@ public class DetailFragment extends ZhiliaoFragment {
     }
 
     private void getCoverBitmap() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Target<Bitmap> target = Glide.with(get_mActivity())
-                        .asBitmap()
-                        .load(currentMusicEntity.getCover() != null ? currentMusicEntity.getCover() : R.drawable.baidu)
-                        .error(R.drawable.baidu)
-                        .diskCacheStrategy(DiskCacheStrategy.ALL)
-                        .into(new SimpleTarget<Bitmap>() {
-                            @Override
-                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-//                                handler.sendEmptyMessage()
-                                myRunnable = new MyRunnable(resource);
-                                if (iv_bg_detail != null) {
-                                    iv_bg_detail.post(myRunnable);
-                                }
+        new Thread(() -> {
+            Target<Bitmap> target = Glide.with(get_mActivity())
+                    .asBitmap()
+                    .load(currentMusicEntity.getCover() != null ? currentMusicEntity.getCover() : R.drawable.baidu)
+                    .error(R.drawable.baidu)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
+                    .into(new SimpleTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            myRunnable = new MyRunnable(resource);
+                            if (iv_bg_detail != null) {
+                                iv_bg_detail.post(myRunnable);
                             }
-                        });
+                        }
+                    });
 
-            }
         }).start();
     }
 
@@ -443,13 +481,13 @@ public class DetailFragment extends ZhiliaoFragment {
         pauseAnimation();
     }
 
-    private void showPlaying(MusicEntity musicEntity, boolean isPlayStart, boolean isNeedResetAnim) {
+    private void showPlaying(MusicEntity musicEntity, boolean isPlayStart, boolean isMusicSwitch) {
         if (musicEntity != null) {
-            currentMusicEntity = musicEntity;
-            tv_detail_music_name.setText(musicEntity.getName());
-            tv_singer_name.setText(musicEntity.getSingers().get(0).getName());
-            getCoverBitmap();
-            if (isNeedResetAnim) {
+            if (isMusicSwitch) {
+                currentMusicEntity = musicEntity;
+                tv_detail_music_name.setText(musicEntity.getName());
+                tv_singer_name.setText(musicEntity.getSingers().get(0).getName());
+                getCoverBitmap();
                 resetAnimation();
             }
             if (isPlayStart) {
@@ -491,10 +529,6 @@ public class DetailFragment extends ZhiliaoFragment {
             switch (msg.what) {
                 case UPDATE_UI:
                     if (detailFragment != null) {
-//                        detailFragment.currentMusicEntity.setCoverBitmap(resource);
-//                        detailFragment.coverFragment.setCoverBitmap(resource);
-//                        Drawable blur = createBlurredImageFromBitmap(resource, 12);
-//                        detailFragment.iv_bg_detail.setImageDrawable(blur);
                     }
             }
             super.handleMessage(msg);
@@ -531,27 +565,35 @@ public class DetailFragment extends ZhiliaoFragment {
             queueAdapter = new QueueAdapter(R.layout.item_queue, MusicManager.getInstance().getPlayList());
             queueDialog = QueueDialogHelper.createQueueDialog(getActivity());
             tv_close = queueDialog.findViewById(R.id.tv_close);
+            tv_play_mode = queueDialog.findViewById(R.id.tv_play_mode);
+            iv_play_mode = queueDialog.findViewById(R.id.iv_play_mode);
+            switch (MusicManager.getInstance().getRepeatMode()) {
+                case PlaybackStateCompat.REPEAT_MODE_NONE:
+                    tv_play_mode.setText(play_mode_text[0]);
+                    iv_play_mode.setImageDrawable(play_mode_drawable[0]);
+                    break;
+                case PlaybackStateCompat.REPEAT_MODE_ONE:
+                    tv_play_mode.setText(play_mode_text[1]);
+                    iv_play_mode.setImageDrawable(play_mode_drawable[1]);
+                    break;
+                case PlaybackStateCompat.REPEAT_MODE_ALL:
+                    tv_play_mode.setText(play_mode_text[2]);
+                    iv_play_mode.setImageDrawable(play_mode_drawable[2]);
+                    break;
+            }
+            iv_play_mode.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    nextMode();
+                }
+            });
             recyclerView = queueDialog.findViewById(R.id.rcv_songs);
             recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
             recyclerView.setAdapter(queueAdapter);
-            tv_close.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    hideQueueDialog();
-                }
-            });
-            queueAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
-                @Override
-                public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                    MusicManager.getInstance().playMusicByIndex(position);
-
-                }
-            });
-            queueAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
-                @Override
-                public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-                    if (view.getId() == R.id.iv_more) {
-                    }
+            tv_close.setOnClickListener(v -> hideQueueDialog());
+            queueAdapter.setOnItemClickListener((adapter, view, position) -> MusicManager.getInstance().playMusicByIndex(position));
+            queueAdapter.setOnItemChildClickListener((adapter, view, position) -> {
+                if (view.getId() == R.id.iv_more) {
                 }
             });
         }
@@ -559,6 +601,36 @@ public class DetailFragment extends ZhiliaoFragment {
             recyclerView.scrollToPosition(MusicManager.getInstance().getNowPlayingIndex());
         }
         queueDialog.show();
+    }
+
+    private void nextMode() {
+        switch (MusicManager.getInstance().getRepeatMode()) {
+            case PlaybackStateCompat.REPEAT_MODE_NONE:
+                MusicManager.getInstance().setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ONE);
+                if (queueDialog != null) {
+                    tv_play_mode.setText(play_mode_text[1]);
+                    iv_play_mode.setImageDrawable(play_mode_drawable[1]);
+                }
+                iv_playmode.setImageDrawable(play_mode_drawable[1]);
+                break;
+            case PlaybackStateCompat.REPEAT_MODE_ONE:
+                MusicManager.getInstance().setRepeatMode(PlaybackStateCompat.REPEAT_MODE_ALL);
+                if (queueDialog != null) {
+                    tv_play_mode.setText(play_mode_text[2]);
+                    iv_play_mode.setImageDrawable(play_mode_drawable[2]);
+                }
+                iv_playmode.setImageDrawable(play_mode_drawable[2]);
+                break;
+            case PlaybackStateCompat.REPEAT_MODE_ALL:
+                MusicManager.getInstance().setRepeatMode(PlaybackStateCompat.REPEAT_MODE_NONE);
+                if (queueDialog != null) {
+                    tv_play_mode.setText(play_mode_text[0]);
+                    iv_play_mode.setImageDrawable(play_mode_drawable[0]);
+                }
+                iv_playmode.setImageDrawable(play_mode_drawable[0]);
+                break;
+        }
+
     }
 
     private void hideQueueDialog() {

@@ -16,49 +16,58 @@
 
 package com.dev.rexhuang.zhiliao_core.player2.playback;
 
-import android.content.res.Resources;
-import android.os.AsyncTask;
+import android.content.Context;
 import android.os.Bundle;
+import android.os.ResultReceiver;
 import android.os.SystemClock;
-
+import android.support.v4.media.MediaMetadataCompat;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.annotation.NonNull;
 
-import com.dev.rexhuang.zhiliao_core.R;
+import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
+import com.dev.rexhuang.zhiliao_core.player2.notification.factory.INotification;
+import com.dev.rexhuang.zhiliao_core.player2.notification.factory.NotificationFactory;
 import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
 
-import com.dev.rexhuang.zhiliao_core.utils.MediaIDHelper;
-import com.dev.rexhuang.zhiliao_core.utils.WearHelper;
-import com.orhanobut.logger.Logger;
 
 /**
- * Manage the interactions among the container service, the queue manager and the actual playback.
+ * 响应用户操作播放器以实际调用播放器操作
+ * *  created by RexHuang
+ * *  on 2019/9/4
  */
 public class PlaybackManager implements Playback.Callback {
 
     private static final String TAG = PlaybackManager.class.getSimpleName();
-    // Action to thumbs up a media item
-    private static final String CUSTOM_ACTION_THUMBS_UP = "com.example.android.uamp.THUMBS_UP";
 
-    private MusicProvider mMusicProvider;
+    private Context mContext;
     private QueueManager mQueueManager;
-    private Resources mResources;
     private Playback mPlayback;
     private PlaybackServiceCallback mServiceCallback;
     private MediaSessionCallback mMediaSessionCallback;
+    private NotificationFactory mNotificationFactory;
+    private int currRepeatMode;
+    private boolean shouldPlayNext = true; //是否可以播放下一首
+    private boolean shouldPlayPre = false;  //是否可以播放上一首
+    private PlaybackStateCompat.Builder stateBuilder;
 
-    public PlaybackManager(PlaybackServiceCallback serviceCallback, Resources resources,
-                           MusicProvider musicProvider, QueueManager queueManager,
+
+    public PlaybackManager(Context context, PlaybackServiceCallback serviceCallback, QueueManager queueManager,
                            Playback playback) {
-        mMusicProvider = musicProvider;
+        mContext = context;
+
         mServiceCallback = serviceCallback;
-        mResources = resources;
         mQueueManager = queueManager;
         mMediaSessionCallback = new MediaSessionCallback();
         mPlayback = playback;
         mPlayback.setCallback(this);
+        MusicManager.getInstance().setPlayback(mPlayback);
+        currRepeatMode = PlaybackStateCompat.REPEAT_MODE_NONE;
+    }
+
+    public void setNotificationFactory(NotificationFactory notificationFactory) {
+        mNotificationFactory = notificationFactory;
     }
 
     public Playback getPlayback() {
@@ -70,322 +79,361 @@ public class PlaybackManager implements Playback.Callback {
     }
 
     /**
-     * Handle a request to play music
+     * 播放
      */
-    public void handlePlayRequest() {
-        Logger.t(TAG).d("handlePlayRequest: mState=" + mPlayback.getState());
-//        MediaSessionCompat.QueueItem currentMusic = mQueueManager.getCurrentMusic();
-//        if (currentMusic != null) {
-//            mServiceCallback.onPlaybackStart();
-//            mPlayback.play(currentMusic);
-//        }
+    public void handlePlayRequest(boolean isPlayWhenReady) {
+        MediaSessionCompat.QueueItem currentMusic = mQueueManager.getCurrentMusic();
+        if (currentMusic != null) {
+            if (isPlayWhenReady) {
+                mServiceCallback.onPlaybackStart();
+            }
+            mPlayback.play(currentMusic, isPlayWhenReady);
+        }
     }
 
     /**
-     * Handle a request to pause music
+     * 暂停
      */
     public void handlePauseRequest() {
-//        Logger.t(TAG).d("handlePauseRequest: mState=" + mPlayback.getState());
-//        if (mPlayback.isPlaying()) {
-//            mPlayback.pause();
-//            mServiceCallback.onPlaybackStop();
-//        }
+        if (mPlayback.isPlaying()) {
+            mPlayback.pause();
+            mServiceCallback.onPlaybackStop();
+        }
     }
 
     /**
-     * Handle a request to stop music
-     *
-     * @param withError Error message in case the stop has an unexpected cause. The error
-     *                  message will be set in the PlaybackState and will be visible to
-     *                  MediaController clients.
+     * 停止
      */
     public void handleStopRequest(String withError) {
-//        Logger.t(TAG).d("handleStopRequest: mState=" + mPlayback.getState() + " error=", withError);
-//        mPlayback.stop(true);
-//        mServiceCallback.onPlaybackStop();
-//        updatePlaybackState(withError);
+        mPlayback.stop(true);
+        mServiceCallback.onPlaybackStop();
+        updatePlaybackState(false, withError);
     }
-
 
     /**
-     * Update the current media player state, optionally showing an error message.
-     *
-     * @param error if not null, error message to present to the user.
+     * 快进
      */
-    public void updatePlaybackState(String error) {
-//        Logger.t(TAG).d("updatePlaybackState, playback state=" + mPlayback.getState());
-//        long position = PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
-//        if (mPlayback != null && mPlayback.isConnected()) {
-//            position = mPlayback.getCurrentStreamPosition();
-//        }
-//
-//        //noinspection ResourceType
-//        PlaybackStateCompat.Builder stateBuilder = new PlaybackStateCompat.Builder()
-//                .setActions(getAvailableActions());
-//
-//        setCustomAction(stateBuilder);
-//        int state = mPlayback.getState();
-//
-//        // If there is an error message, send it to the playback state:
-//        if (error != null) {
-//            // Error states are really only supposed to be used for errors that cause playback to
-//            // stop unexpectedly and persist until the user takes action to fix it.
-//            stateBuilder.setErrorMessage(error);
-//            state = PlaybackStateCompat.STATE_ERROR;
-//        }
-//        //noinspection ResourceType
-//        stateBuilder.setState(state, position, 1.0f, SystemClock.elapsedRealtime());
-//
-//        // Set the activeQueueItemId if the current index is valid.
-//        MediaSessionCompat.QueueItem currentMusic = mQueueManager.getCurrentMusic();
-//        if (currentMusic != null) {
-//            stateBuilder.setActiveQueueItemId(currentMusic.getQueueId());
-//        }
-//
-//        mServiceCallback.onPlaybackStateUpdated(stateBuilder.build());
-//
-//        if (state == PlaybackStateCompat.STATE_PLAYING ||
-//                state == PlaybackStateCompat.STATE_PAUSED) {
-//            mServiceCallback.onNotificationRequired();
-//        }
+    public void handleFastForward() {
+        mPlayback.onFastForward();
     }
 
-    private void setCustomAction(PlaybackStateCompat.Builder stateBuilder) {
-//        MediaSessionCompat.QueueItem currentMusic = mQueueManager.getCurrentMusic();
-//        if (currentMusic == null) {
-//            return;
-//        }
-//        // Set appropriate "Favorite" icon on Custom action:
-//        String mediaId = currentMusic.getDescription().getMediaId();
-//        if (mediaId == null) {
-//            return;
-//        }
-//        String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
-//        int favoriteIcon = mMusicProvider.isFavorite(musicId) ?
-//                R.drawable.ic_star_on : R.drawable.ic_star_off;
-//        Logger.t(TAG).d("updatePlaybackState, setting Favorite custom action of music ",
-//                musicId, " current favorite=", mMusicProvider.isFavorite(musicId));
-//        Bundle customActionExtras = new Bundle();
-//        WearHelper.setShowCustomActionOnWear(customActionExtras, true);
-//        stateBuilder.addCustomAction(new PlaybackStateCompat.CustomAction.Builder(
-//                CUSTOM_ACTION_THUMBS_UP, mResources.getString(R.string.favorite), favoriteIcon)
-//                .setExtras(customActionExtras)
-//                .build());
+    /**
+     * 倒带
+     */
+    public void handleRewind() {
+        mPlayback.onRewind();
     }
 
-    private long getAvailableActions() {
-        long actions =
-                PlaybackStateCompat.ACTION_PLAY_PAUSE |
-                        PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID |
-                        PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH |
-                        PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
-                        PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
-        if (mPlayback.isPlaying()) {
-            actions |= PlaybackStateCompat.ACTION_PAUSE;
+    /**
+     * 指定语速 refer 是否已当前速度为基数  multiple 倍率
+     */
+    public void handleDerailleur(boolean refer, float multiple) {
+        mPlayback.onDerailleur(refer, multiple);
+    }
+
+    /**
+     * 更新播放状态
+     */
+    public void updatePlaybackState(boolean isOnlyUpdateActions, String error) {
+        if (isOnlyUpdateActions && stateBuilder != null) {
+            //单独更新 Actions
+            stateBuilder.setActions(getAvailableActions());
+            mServiceCallback.onPlaybackStateUpdated(stateBuilder.build(), null);
         } else {
-            actions |= PlaybackStateCompat.ACTION_PLAY;
+            long position = PlaybackStateCompat.PLAYBACK_POSITION_UNKNOWN;
+            if (mPlayback != null && mPlayback.isConnected()) {
+                position = mPlayback.getCurrentStreamPosition();
+            }
+            //构建一个播放状态对象
+            stateBuilder = new PlaybackStateCompat.Builder()
+                    .setActions(getAvailableActions());
+            //获取播放器播放状态
+            int state = mPlayback.getState();
+            //如果错误信息不为 null 的时候，播放状态设为 STATE_ERROR
+            if (error != null) {
+                stateBuilder.setErrorMessage(error);
+                state = PlaybackStateCompat.STATE_ERROR;
+            }
+            //设置播放状态
+            stateBuilder.setState(state, position, 1.0f, SystemClock.elapsedRealtime());
+            //设置当前活动的 musicId
+            MediaSessionCompat.QueueItem currentMusic = mQueueManager.getCurrentMusic();
+            MediaMetadataCompat currMetadata = null;
+            if (currentMusic != null) {
+                stateBuilder.setActiveQueueItemId(currentMusic.getQueueId());
+                final String musicId = currentMusic.getDescription().getMediaId();
+                currMetadata = MusicProvider.getInstance().getMusic(musicId);
+            }
+            //把状态回调出去
+            mServiceCallback.onPlaybackStateUpdated(stateBuilder.build(), currMetadata);
+            //如果是播放或者暂停的状态，更新一下通知栏
+            if (state == PlaybackStateCompat.STATE_PLAYING || state == PlaybackStateCompat.STATE_PAUSED) {
+                mServiceCallback.onNotificationRequired();
+            }
+        }
+    }
+
+    /**
+     * 获取状态
+     */
+    private long getAvailableActions() {
+        long actions = PlaybackStateCompat.ACTION_PLAY_PAUSE |
+                PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID |
+                PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH |
+                PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS |
+                PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
+        if (mPlayback.isPlaying()) {
+            actions |= PlaybackStateCompat.ACTION_PAUSE; //添加 ACTION_PAUSE
+        } else {
+            actions |= PlaybackStateCompat.ACTION_PLAY; //添加 ACTION_PLAY
+        }
+        if (!shouldPlayNext) {
+            //在不能播放下一首的情况下，判断actions是否包含ACTION_SKIP_TO_NEXT，如果包含则清除
+            if ((actions & PlaybackStateCompat.ACTION_SKIP_TO_NEXT) != 0) {
+                actions &= ~PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
+            }
+        } else {
+            //判断 actions 是否包含 ACTION_SKIP_TO_NEXT，如果不包含，则添加
+            if ((actions & PlaybackStateCompat.ACTION_SKIP_TO_NEXT) == 0) {
+                actions |= PlaybackStateCompat.ACTION_SKIP_TO_NEXT;
+            }
+        }
+        //同理
+        if (!shouldPlayPre) {
+            if ((actions & PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) != 0) {
+                actions &= ~PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS;
+            }
+        } else {
+            if ((actions & PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS) == 0) {
+                actions |= PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS;
+            }
         }
         return actions;
     }
 
     /**
-     * Implementation of the Playback.Callback interface
+     * 播放器播放完成回调
      */
     @Override
     public void onCompletion() {
-//        // The media player finished playing the current song, so we go ahead
-//        // and start the next.
-//        if (mQueueManager.skipQueuePosition(1)) {
-//            handlePlayRequest();
-//            mQueueManager.updateMetadata();
-//        } else {
-//            // If skipping was not possible, we stop and release the resources:
-//            handleStopRequest(null);
-//        }
+        updatePlaybackState(false, null);
+        //单曲模式(播放当前就结束)
+        if (currRepeatMode == PlaybackStateCompatExt.SINGLE_MODE_ONE) {
+            return;
+        }
+        if (currRepeatMode == PlaybackStateCompat.REPEAT_MODE_NONE) {
+            //顺序播放
+            shouldPlayNext = mQueueManager.getCurrentIndex() != mQueueManager.getCurrentQueueSize() - 1
+                    && mQueueManager.skipQueuePosition(1);
+            if (shouldPlayNext) {
+                handlePlayRequest(true);
+                mQueueManager.updateMetadata();
+            } else {
+                handleStopRequest(null);
+            }
+        } else if (currRepeatMode == PlaybackStateCompat.REPEAT_MODE_ONE) {
+            //单曲循环
+            shouldPlayNext = false;
+            mPlayback.setCurrentMediaId("");
+            handlePlayRequest(true);
+        } else if (currRepeatMode == PlaybackStateCompat.REPEAT_MODE_ALL) {
+            //列表循环
+            shouldPlayNext = mQueueManager.skipQueuePosition(1);
+            if (shouldPlayNext) {
+                handlePlayRequest(true);
+                mQueueManager.updateMetadata();
+            } else {
+                handleStopRequest(null);
+            }
+        }
     }
-
-    @Override
-    public void onPlaybackStatusChanged(int state) {
-        updatePlaybackState(null);
-    }
-
-    @Override
-    public void onError(String error) {
-        updatePlaybackState(error);
-    }
-
-    @Override
-    public void setCurrentMediaId(String mediaId) {
-//        Logger.t(TAG).d("setCurrentMediaId", mediaId);
-//        mQueueManager.setQueueFromMusic(mediaId);
-    }
-
 
     /**
-     * Switch to a different Playback instance, maintaining all playback state, if possible.
-     *
-     * @param playback switch to this playback
+     * 播放器播放状态改变回调
      */
-    public void switchToPlayback(Playback playback, boolean resumePlaying) {
-        if (playback == null) {
-            throw new IllegalArgumentException("Playback cannot be null");
-        }
-        // Suspends current state.
-        int oldState = mPlayback.getState();
-        long pos = mPlayback.getCurrentStreamPosition();
-        String currentMediaId = mPlayback.getCurrentMediaId();
-        mPlayback.stop(false);
-        playback.setCallback(this);
-        playback.setCurrentMediaId(currentMediaId);
-        playback.seekTo(pos < 0 ? 0 : pos);
-        playback.start();
-        // Swaps instance.
-        mPlayback = playback;
-        switch (oldState) {
-            case PlaybackStateCompat.STATE_BUFFERING:
-            case PlaybackStateCompat.STATE_CONNECTING:
-            case PlaybackStateCompat.STATE_PAUSED:
-                mPlayback.pause();
-                break;
-            case PlaybackStateCompat.STATE_PLAYING:
-//                MediaSessionCompat.QueueItem currentMusic = mQueueManager.getCurrentMusic();
-//                if (resumePlaying && currentMusic != null) {
-//                    mPlayback.play(currentMusic);
-//                } else if (!resumePlaying) {
-//                    mPlayback.pause();
-//                } else {
-//                    mPlayback.stop(true);
-//                }
-                break;
-            case PlaybackStateCompat.STATE_NONE:
-                break;
-            default:
-                Logger.t(TAG).d("Default called. Old state is ", oldState);
-        }
+    @Override
+    public void onPlaybackStatusChanged(int state) {
+        updatePlaybackState(false, null);
     }
 
+    /**
+     * 播放器发送错误回调
+     */
+    @Override
+    public void onError(String error) {
+        updatePlaybackState(false, error);
+    }
 
+    /**
+     * 设置当前播放 id
+     */
+    @Override
+    public void setCurrentMediaId(String mediaId) {
+        mQueueManager.setQueueFromMusic(mediaId);
+    }
+
+    /**
+     * MusicManager API 方法的具体实现
+     */
     private class MediaSessionCallback extends MediaSessionCompat.Callback {
+
+        @Override
+        public void onPrepare() {
+            super.onPrepare();
+            handlePlayRequest(false);
+        }
+
+        @Override
+        public void onPrepareFromMediaId(String mediaId, Bundle extras) {
+            super.onPrepareFromMediaId(mediaId, extras);
+            mQueueManager.setQueueFromMusic(mediaId);
+            handlePlayRequest(false);
+        }
+
         @Override
         public void onPlay() {
-//            Logger.t(TAG).d("play");
-//            if (mQueueManager.getCurrentMusic() == null) {
-//                mQueueManager.setRandomQueue();
-//            }
-//            handlePlayRequest();
+            if (mQueueManager.getCurrentMusic() == null) {
+                mQueueManager.setRandomQueue();
+            }
+            handlePlayRequest(true);
         }
 
         @Override
         public void onSkipToQueueItem(long queueId) {
-//            Logger.t(TAG).d("OnSkipToQueueItem:" + queueId);
-//            mQueueManager.setCurrentQueueItem(queueId);
-//            mQueueManager.updateMetadata();
+            mQueueManager.setCurrentQueueItem(String.valueOf(queueId));
+            mQueueManager.updateMetadata();
         }
 
         @Override
         public void onSeekTo(long position) {
-//            Logger.t(TAG).d("onSeekTo:", position);
-//            mPlayback.seekTo((int) position);
+            mPlayback.seekTo((int) position);
         }
 
         @Override
         public void onPlayFromMediaId(String mediaId, Bundle extras) {
-            Logger.t(TAG).d("playFromMediaId mediaId:", mediaId, "  extras=", extras);
-//            mQueueManager.setQueueFromMusic(mediaId);
-//            mQueueManager.setCurrentItem();
-            handlePlayRequest();
+            mQueueManager.setQueueFromMusic(mediaId);
+            handlePlayRequest(true);
         }
 
         @Override
         public void onPause() {
-            Logger.t(TAG).d("pause. current state=" + mPlayback.getState());
             handlePauseRequest();
         }
 
         @Override
         public void onStop() {
-            Logger.t(TAG).d("stop. current state=" + mPlayback.getState());
             handleStopRequest(null);
         }
 
         @Override
         public void onSkipToNext() {
-//            Logger.t(TAG).d("skipToNext");
-//            if (mQueueManager.skipQueuePosition(1)) {
-//                handlePlayRequest();
-//            } else {
-//                handleStopRequest("Cannot skip");
-//            }
-//            mQueueManager.updateMetadata();
+            if (currRepeatMode == PlaybackStateCompat.REPEAT_MODE_NONE) {
+                //顺序播放
+                shouldPlayNext = mQueueManager.getCurrentIndex() != mQueueManager.getCurrentQueueSize() - 1
+                        && mQueueManager.skipQueuePosition(1);
+            } else {
+                shouldPlayNext = mQueueManager.skipQueuePosition(1);
+            }
+            if (shouldPlayNext) {
+                //当前的媒体如果是在倒数第二首点击到最后一首的时候，如果不重新判断，会用于为 true
+                if (currRepeatMode == PlaybackStateCompat.REPEAT_MODE_NONE) {
+                    shouldPlayNext = mQueueManager.getCurrentIndex() != mQueueManager.getCurrentQueueSize() - 1;
+                }
+                shouldPlayPre = true;
+                handlePlayRequest(true);
+                mQueueManager.updateMetadata();
+            }
         }
 
         @Override
         public void onSkipToPrevious() {
-//            if (mQueueManager.skipQueuePosition(-1)) {
-//                handlePlayRequest();
-//            } else {
-//                handleStopRequest("Cannot skip");
-//            }
-//            mQueueManager.updateMetadata();
+            if (currRepeatMode == PlaybackStateCompat.REPEAT_MODE_NONE) {
+                shouldPlayPre = mQueueManager.getCurrentIndex() != 0 && mQueueManager.skipQueuePosition(-1);
+            } else {
+                shouldPlayPre = mQueueManager.skipQueuePosition(-1);
+            }
+            if (shouldPlayPre) {
+                //当前的媒体如果是在第二首点击到上一首的时候，如果不重新判断，会用于为 true
+                if (currRepeatMode == PlaybackStateCompat.REPEAT_MODE_NONE) {
+                    shouldPlayPre = mQueueManager.getCurrentIndex() != 0;
+                }
+                shouldPlayNext = true;
+                handlePlayRequest(true);
+                mQueueManager.updateMetadata();
+            }
         }
 
         @Override
         public void onCustomAction(@NonNull String action, Bundle extras) {
-//            if (CUSTOM_ACTION_THUMBS_UP.equals(action)) {
-//                Logger.t(TAG).i( "onCustomAction: favorite for current track");
-//                MediaSessionCompat.QueueItem currentMusic = mQueueManager.getCurrentMusic();
-//                if (currentMusic != null) {
-//                    String mediaId = currentMusic.getDescription().getMediaId();
-//                    if (mediaId != null) {
-//                        String musicId = MediaIDHelper.extractMusicIDFromMediaID(mediaId);
-//                        mMusicProvider.setFavorite(musicId, !mMusicProvider.isFavorite(musicId));
-//                    }
-//                }
-//                // playback state needs to be updated because the "Favorite" icon on the
-//                // custom action will change to reflect the new favorite state.
-//                updatePlaybackState(null);
-//            } else {
-//                Logger.t(TAG).e( "Unsupported action: ", action);
-//            }
+            //updatePlaybackState(null);
+        }
+
+        @Override
+        public void onFastForward() {
+            super.onFastForward();
+            handleFastForward();
+        }
+
+        @Override
+        public void onRewind() {
+            super.onRewind();
+            handleRewind();
+        }
+
+        @Override
+        public void onSetShuffleMode(int shuffleMode) {
+            super.onSetShuffleMode(shuffleMode);
+            mQueueManager.setQueueByShuffleMode(shuffleMode);
+            mServiceCallback.onShuffleModeUpdated(shuffleMode);
+        }
+
+        @Override
+        public void onSetRepeatMode(int repeatMode) {
+            super.onSetRepeatMode(repeatMode);
+            currRepeatMode = repeatMode;
+            mServiceCallback.onRepeatModeUpdated(repeatMode);
+            if (currRepeatMode == PlaybackStateCompat.REPEAT_MODE_NONE) {
+                shouldPlayNext = mQueueManager.getCurrentIndex() != mQueueManager.getCurrentQueueSize() - 1;
+                shouldPlayPre = mQueueManager.getCurrentIndex() != 0;
+            } else {
+                shouldPlayNext = true;
+                shouldPlayPre = true;
+            }
+            updatePlaybackState(true, null);  //更新状态
         }
 
         /**
-         * Handle free and contextual searches.
-         * <p/>
-         * All voice searches on Android Auto are sent to this method through a connected
-         * {@link android.support.v4.media.session.MediaControllerCompat}.
-         * <p/>
-         * Threads and async handling:
-         * Search, as a potentially slow operation, should run in another thread.
-         * <p/>
-         * Since this method runs on the main thread, most apps with non-trivial metadata
-         * should defer the actual search to another thread (for example, by using
-         * an {@link AsyncTask} as we do here).
-         **/
+         * 自定义方法
+         */
         @Override
-        public void onPlayFromSearch(final String query, final Bundle extras) {
-//            Logger.t(TAG).d("playFromSearch  query=", query, " extras=", extras);
-//
-//            mPlayback.setState(PlaybackStateCompat.STATE_CONNECTING);
-//            mMusicProvider.retrieveMediaAsync(new MusicProvider.Callback() {
-//                @Override
-//                public void onMusicCatalogReady(boolean success) {
-//                    if (!success) {
-//                        updatePlaybackState("Could not load catalog");
-//                    }
-//
-//                    boolean successSearch = mQueueManager.setQueueFromSearch(query, extras);
-//                    if (successSearch) {
-//                        handlePlayRequest();
-//                        mQueueManager.updateMetadata();
-//                    } else {
-//                        updatePlaybackState("Could not find music");
-//                    }
-//                }
-//            });
+        public void onCommand(String command, Bundle extras, ResultReceiver cb) {
+            super.onCommand(command, extras, cb);
+            if (command == null) {
+                return;
+            }
+            if (INotification.ACTION_UPDATE_FAVORITE_UI.equals(command)) {
+                boolean isFavorite = extras.getBoolean("isFavorite");
+                if (mNotificationFactory != null) {
+                    mNotificationFactory.updateFavoriteUI(isFavorite);
+                }
+            }
+            if (INotification.ACTION_UPDATE_LYRICS_UI.equals(command)) {
+                boolean isChecked = extras.getBoolean("isChecked");
+                if (mNotificationFactory != null) {
+                    mNotificationFactory.updateLyricsUI(isChecked);
+                }
+            }
+            if (ExoPlayback.ACTION_CHANGE_VOLUME.equals(command)) {
+                float audioVolume = extras.getFloat("AudioVolume");
+                mPlayback.setVolume(audioVolume);
+            }
+            if (ExoPlayback.ACTION_DERAILLEUR.equals(command)) {
+                boolean refer = extras.getBoolean("refer");
+                float multiple = extras.getFloat("multiple");
+                handleDerailleur(refer, multiple);
+            }
         }
     }
-
 
     public interface PlaybackServiceCallback {
         void onPlaybackStart();
@@ -394,6 +442,14 @@ public class PlaybackManager implements Playback.Callback {
 
         void onPlaybackStop();
 
-        void onPlaybackStateUpdated(PlaybackStateCompat newState);
+        void onPlaybackStateUpdated(PlaybackStateCompat newState, MediaMetadataCompat currMetadata);
+
+        void onShuffleModeUpdated(int shuffleMode);
+
+        void onRepeatModeUpdated(int repeatMode);
+    }
+
+    public static class PlaybackStateCompatExt {
+        public static int SINGLE_MODE_ONE = 4;
     }
 }

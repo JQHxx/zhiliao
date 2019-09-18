@@ -29,13 +29,16 @@ public class DetailActivity extends ZhiliaoActivity {
         Intent intent = getIntent();
         String musicId = intent.getStringExtra(BaseActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION);
         float rotation = intent.getFloatExtra(BaseActivity.EXTRA_CURRENT_MEDIA_ROTATION, 0f);
-        if (findFragment(DetailFragment.class)== null) {
+        if (findFragment(DetailFragment.class) == null) {
             detailFragment = DetailFragment.newInstance(musicId, rotation, null);
-        } else{
+        } else {
             Bundle args = detailFragment.getArguments();
-            if (args != null){
-
+            if (args == null) {
+                args = new Bundle();
             }
+            args.putString(BaseActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION, musicId);
+            args.putFloat(BaseActivity.EXTRA_CURRENT_MEDIA_ROTATION, rotation);
+            detailFragment.setArguments(args);
         }
     }
 

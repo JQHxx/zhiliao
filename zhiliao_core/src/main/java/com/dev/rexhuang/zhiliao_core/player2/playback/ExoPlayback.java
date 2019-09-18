@@ -1,17 +1,16 @@
-package com.dev.rexhuang.zhiliao_core.player2.zhiliaoplayback;
+package com.dev.rexhuang.zhiliao_core.player2.playback;
 
 import android.content.Context;
 import android.net.Uri;
 import android.support.v4.media.MediaMetadataCompat;
-import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.MediaSessionCompat.QueueItem;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.text.TextUtils;
 
 import androidx.annotation.Nullable;
 
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaomodel.MusicProvider;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaoplayback.download.ExoDownload;
+import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
+import com.dev.rexhuang.zhiliao_core.player2.playback.download.ExoDownload;
 import com.google.android.exoplayer2.C;
 import com.google.android.exoplayer2.DefaultRenderersFactory;
 import com.google.android.exoplayer2.ExoPlaybackException;

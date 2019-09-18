@@ -18,10 +18,10 @@ import com.dev.rexhuang.zhiliao_core.player2.notification.factory.INotification;
 import com.dev.rexhuang.zhiliao_core.player2.utils.MD5;
 import com.dev.rexhuang.zhiliao_core.player2.utils.imageloader.ILoaderStrategy;
 import com.dev.rexhuang.zhiliao_core.player2.utils.imageloader.ImageLoader;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaomodel.MusicProvider;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaoplayback.ExoPlayback;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaoplayback.Playback;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaoplayback.download.ExoDownload;
+import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
+import com.dev.rexhuang.zhiliao_core.player2.playback.ExoPlayback;
+import com.dev.rexhuang.zhiliao_core.player2.playback.Playback;
+import com.dev.rexhuang.zhiliao_core.player2.playback.download.ExoDownload;
 import com.orhanobut.logger.Logger;
 
 

@@ -24,10 +24,10 @@ import com.dev.rexhuang.zhiliao_core.base.BaseActivity;
 import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 import com.dev.rexhuang.zhiliao_core.player2.notification.NotificationConstructor;
 import com.dev.rexhuang.zhiliao_core.player2.notification.factory.NotificationFactory;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaomodel.MusicProvider;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaoplayback.ExoPlayback;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaoplayback.PlaybackManager;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaoplayback.QueueManager;
+import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
+import com.dev.rexhuang.zhiliao_core.player2.playback.ExoPlayback;
+import com.dev.rexhuang.zhiliao_core.player2.playback.PlaybackManager;
+import com.dev.rexhuang.zhiliao_core.player2.playback.QueueManager;
 import com.orhanobut.logger.Logger;
 
 import java.lang.ref.WeakReference;

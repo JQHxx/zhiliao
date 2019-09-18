@@ -5,4 +5,10 @@
     <string name="title_notifications">Notifications</string>
     <string name="logo">logo</string>
     <string name="close">关闭</string>
+
+    <string-array name="play_mode_text">
+        <item>顺序播放</item>
+        <item>单曲循环</item>
+        <item>列表循环</item>
+    </string-array>
 </resources>

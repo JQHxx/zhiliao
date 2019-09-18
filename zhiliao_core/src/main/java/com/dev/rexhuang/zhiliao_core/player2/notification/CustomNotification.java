@@ -32,7 +32,7 @@ import com.dev.rexhuang.zhiliao_core.player2.notification.utils.NotificationColo
 import com.dev.rexhuang.zhiliao_core.player2.notification.utils.NotificationUtils;
 import com.dev.rexhuang.zhiliao_core.player2.utils.imageloader.BitmapCallBack;
 import com.dev.rexhuang.zhiliao_core.player2.utils.imageloader.ImageLoader;
-import com.dev.rexhuang.zhiliao_core.player2.zhiliaomodel.MusicProvider;
+import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
 
 
 import java.util.List;

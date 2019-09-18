@@ -16,7 +16,7 @@
 
     <application>
         <service
-            android:name=".player2.zhiliaoplayback.download.ExoDownloadService"
+            android:name=".player2.playback.download.ExoDownloadService"
             android:exported="false">
             <intent-filter>
                 <action android:name="com.dev.rexhuang.zhiliao_core.downloadService.action.RESTART" />

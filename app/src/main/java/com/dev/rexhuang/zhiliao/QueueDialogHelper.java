@@ -1,19 +1,11 @@
 package com.dev.rexhuang.zhiliao;
 
 import android.app.Activity;
-import android.content.Context;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.TextView;
 
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.dev.rexhuang.zhiliao.find.queue.QueueAdapter;
-import com.dev.rexhuang.zhiliao_core.bean.Music;
-import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 

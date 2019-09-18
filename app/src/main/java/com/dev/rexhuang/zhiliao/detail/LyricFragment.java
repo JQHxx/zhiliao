@@ -1,7 +1,6 @@
 package com.dev.rexhuang.zhiliao.detail;
 
 import android.os.Bundle;
-import android.os.Message;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +11,10 @@ import androidx.fragment.app.Fragment;
 
 import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.event.MessageEvent;
-import com.dev.rexhuang.zhiliao.event.MusicHallEvent;
 import com.dev.rexhuang.zhiliao.music_hall.MusicHallFragment;
 import com.dev.rexhuang.zhiliao_core.api.ZhiliaoApi;
 import com.dev.rexhuang.zhiliao_core.base.BaseActivity;
-import com.dev.rexhuang.zhiliao_core.bean.Music;
 import com.dev.rexhuang.zhiliao_core.entity.LyricEntity;
-import com.dev.rexhuang.zhiliao_core.net.callback.IFailure;
 import com.dev.rexhuang.zhiliao_core.net.callback.ISuccess;
 import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 
