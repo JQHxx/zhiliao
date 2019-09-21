@@ -42,16 +42,27 @@
             app:layout_constraintStart_toEndOf="@+id/back_arrow"
             app:layout_constraintTop_toTopOf="parent">
 
-            <com.mikepenz.iconics.view.IconicsTextView
-                android:id="@+id/iconicsTextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:text="{faw-search}"
-                android:textColor="@color/search_color"
-                android:textSize="12sp"
+            <!--<com.mikepenz.iconics.view.IconicsTextView-->
+            <!--android:id="@+id/iconicsTextView"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:gravity="center"-->
+            <!--android:text="{faw-search}"-->
+            <!--android:textColor="@color/search_color"-->
+            <!--android:textSize="12sp"-->
+            <!--app:layout_constraintBottom_toBottomOf="parent"-->
+            <!--app:layout_constraintEnd_toEndOf="parent"-->
+            <!--app:layout_constraintHorizontal_bias="0.05"-->
+            <!--app:layout_constraintStart_toStartOf="parent"-->
+            <!--app:layout_constraintTop_toTopOf="parent" />-->
+
+            <ImageView
+                android:id="@+id/iv_search"
+                android:layout_width="@dimen/dp_20"
+                android:layout_height="@dimen/dp_20"
+                android:src="@drawable/ic_search"
+                android:tint="@color/hint_color"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.05"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -72,11 +83,26 @@
                 android:inputType="textFilter|textNoSuggestions"
                 android:maxLines="1"
                 android:textColor="@color/white"
-                android:textColorHint="@color/white"
+                android:textColorHint="@color/hint_color"
+                android:textCursorDrawable="@null"
                 android:textSize="@dimen/sp_16"
-                app:layout_constraintBaseline_toBaselineOf="@+id/iconicsTextView"
+                app:layout_constraintBaseline_toBaselineOf="@+id/iv_search"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/iconicsTextView"
+                app:layout_constraintEnd_toStartOf="@+id/iv_et_clear"
+                app:layout_constraintHorizontal_bias="1.0"
+                app:layout_constraintStart_toEndOf="@+id/iv_search"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/iv_et_clear"
+                android:layout_width="@dimen/dp_20"
+                android:layout_height="@dimen/dp_20"
+                android:src="@drawable/ic_clear"
+                android:tint="@color/hint_color"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/searchEditText"
                 app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.constraintlayout.widget.ConstraintLayout>

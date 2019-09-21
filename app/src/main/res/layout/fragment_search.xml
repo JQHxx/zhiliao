@@ -1,35 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/ll_search"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/toolbar"
     android:orientation="vertical">
 
-    <EditText
+    <include layout="@layout/searchbar" />
+
+    <RelativeLayout
+        android:id="@+id/rl_loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/cl_record"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:layout_marginStart="@dimen/dp_20"
-        android:layout_marginTop="20dp"
-        android:layout_marginEnd="@dimen/dp_20"
-        android:layout_marginBottom="4dp"
-        android:background="@drawable/toolbar_search_background"
-        android:drawablePadding="8dp"
-        android:focusable="true"
-        android:focusableInTouchMode="true"
-        android:hint="@string/search"
-        android:imeOptions="actionSearch|flagNoFullscreen"
-        android:inputType="textFilter|textNoSuggestions"
-        android:maxLines="1"
-        android:paddingStart="@dimen/dp_16"
-        android:paddingEnd="@dimen/dp_16"
-        android:textColor="@color/white"
-        android:textColorHint="@color/white"
-        android:visibility="gone"
-        tools:ignore="RtlHardcoded" />
+        android:layout_weight="1"
+        android:paddingTop="@dimen/dp_15">
 
-    <include layout="@layout/searchbar" />
+        <TextView
+            android:id="@+id/tv_record_histroy"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/record_histroy"
+            android:textColor="@color/white"
+            android:textSize="@dimen/sp_18"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.05"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.05" />
+
+        <ImageView
+            android:id="@+id/iv_record_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_delete_selector"
+            app:layout_constraintBottom_toBottomOf="@+id/tv_record_histroy"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.95"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/tv_record_histroy" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rv_record"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:background="@color/toolbar"
+            android:clipToPadding="false"
+            android:overScrollMode="never"
+            android:paddingTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/tv_record_histroy"
+            app:layout_constraintVertical_bias="0.01999998" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_search"

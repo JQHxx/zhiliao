@@ -36,6 +36,11 @@ import java.util.concurrent.CopyOnWriteArrayList;
 @SuppressLint("StaticFieldLeak")
 public class MusicManager {
 
+    private static final String UPDATE_QUEUE = "UPDATE_QUEUE";
+    private static final String CLEAR_QUEUE = "CLEAR_QUEUE";
+    private static final String DELETE_MUSIC_FROM_QUEUE = "DELETE_MUSIC_FROM_QUEUE";
+    private static final String IS_MUSIC_PLAYING = "IS_MUSIC_PLAYING";
+    private static final String MUSIC_ID = "MUSIC_ID";
     private static Context sContext;
     private NotificationConstructor mConstructor;
     /**
@@ -109,6 +114,34 @@ public class MusicManager {
      */
     public NotificationConstructor getConstructor() {
         return mConstructor;
+    }
+
+    /**
+     * 将歌曲加入到播放列表,会判断播放列表有没有这首歌,有则不重复添加
+     */
+    public void addToMusicQueue(MusicEntity musicEntity) {
+        MediaSessionConnection connection = MediaSessionConnection.getInstance();
+        if (connection.isConnected()) {
+            MusicProvider.getInstance().addMusicEntity(musicEntity);
+            Logger.d(musicEntity.getName() + "加入歌单，当前播放列表歌曲数量 : " + MusicProvider.getInstance().getMusicList().size());
+            if (MusicProvider.getInstance().getMusicList().size() <= 1) {
+                connection.getTransportControls().playFromMediaId(musicEntity.getId(), null);
+            }
+            connection.getTransportControls().sendCustomAction(UPDATE_QUEUE, null);
+        }
+    }
+
+    /**
+     * 将歌曲从播放列表中删除,会自动跳转下一首歌曲
+     */
+    public void deleteFromMusicQueue(MusicEntity musicEntity, boolean isMusicEntityPlaying) {
+        MediaSessionConnection connection = MediaSessionConnection.getInstance();
+        if ((connection.isConnected())) {
+            Bundle args = new Bundle();
+            args.putBoolean(IS_MUSIC_PLAYING, isMusicEntityPlaying);
+            args.putString(MUSIC_ID, musicEntity.getId());
+            connection.getTransportControls().sendCustomAction(DELETE_MUSIC_FROM_QUEUE, args);
+        }
     }
 
     /**
@@ -342,6 +375,16 @@ public class MusicManager {
         MediaSessionConnection connection = MediaSessionConnection.getInstance();
         if (connection.isConnected()) {
             MusicProvider.getInstance().setMusicList(musicEntities);
+        }
+    }
+
+    /**
+     * 清空播放列表
+     */
+    public void clearPlayList() {
+        MediaSessionConnection connection = MediaSessionConnection.getInstance();
+        if (connection.isConnected()) {
+            connection.getTransportControls().sendCustomAction(CLEAR_QUEUE, null);
         }
     }
 

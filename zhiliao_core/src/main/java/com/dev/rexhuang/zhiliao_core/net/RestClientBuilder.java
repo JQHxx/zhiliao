@@ -68,6 +68,9 @@ public class RestClientBuilder {
         if (mHeaders == null) {
             mHeaders = new HashMap<>();
         }
+        if (headers == null){
+            return  this;
+        }
         mHeaders.putAll(headers);
         return this;
     }

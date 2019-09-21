@@ -4,6 +4,7 @@ import com.dev.rexhuang.zhiliao_core.entity.LyricEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongSearchEntity;
 import com.dev.rexhuang.zhiliao_core.entity.User;
+import com.dev.rexhuang.zhiliao_core.entity.ZhiliaoEntity;
 import com.google.gson.Gson;
 
 import java.util.Map;
@@ -110,5 +111,5 @@ public interface RestService {
     Call<String> getSinger(@Url String url, @HeaderMap Map<String, String> headers);
 
     @GET
-    Call<String> getVerify(@Url String url, @HeaderMap Map<String, String> headers);
+    Call<ZhiliaoEntity> getVerify(@Url String url, @HeaderMap Map<String, String> headers);
 }

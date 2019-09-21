@@ -5,6 +5,13 @@ package com.dev.rexhuang.zhiliao.timer;
  * *  on 2019/9/16
  */
 public class TimeHelper {
+
+    /**
+     * 将毫秒单位的时间转换成字符串的时间显示
+     *
+     * @param _ms
+     * @return
+     */
     public static String ms2HMS(long _ms) {
         StringBuilder stringBuilder = new StringBuilder();
         _ms /= 1000;

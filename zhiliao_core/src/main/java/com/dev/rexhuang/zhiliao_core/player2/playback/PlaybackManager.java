@@ -26,6 +26,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 
 import androidx.annotation.NonNull;
 
+import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 import com.dev.rexhuang.zhiliao_core.player2.notification.factory.INotification;
 import com.dev.rexhuang.zhiliao_core.player2.notification.factory.NotificationFactory;
@@ -51,6 +52,11 @@ public class PlaybackManager implements Playback.Callback {
     private boolean shouldPlayNext = true; //是否可以播放下一首
     private boolean shouldPlayPre = false;  //是否可以播放上一首
     private PlaybackStateCompat.Builder stateBuilder;
+    private static final String CLEAR_QUEUE = "CLEAR_QUEUE";
+    private static final String UPDATE_QUEUE = "UPDATE_QUEUE";
+    private static final String DELETE_MUSIC_FROM_QUEUE = "DELETE_MUSIC_FROM_QUEUE";
+    private static final String IS_MUSIC_PLAYING = "IS_MUSIC_PLAYING";
+    private static final String MUSIC_ID = "MUSIC_ID";
 
 
     public PlaybackManager(Context context, PlaybackServiceCallback serviceCallback, QueueManager queueManager,
@@ -366,6 +372,54 @@ public class PlaybackManager implements Playback.Callback {
         @Override
         public void onCustomAction(@NonNull String action, Bundle extras) {
             //updatePlaybackState(null);
+            switch (action) {
+                case UPDATE_QUEUE:
+                    mQueueManager.updateCurrentQueue();
+                    break;
+                case DELETE_MUSIC_FROM_QUEUE:
+                    if (extras.getBoolean(IS_MUSIC_PLAYING, false)) {
+                        String musicId = mQueueManager.getCurrentMusic().getDescription().getMediaId();
+                        int index = mQueueManager.getCurrentIndex();
+                        int size = mQueueManager.getCurrentQueueSize();
+                        switch (currRepeatMode) {
+                            case PlaybackStateCompat.REPEAT_MODE_NONE:
+                                //有下一首的状态
+                                if (index < size - 1) {
+                                    onSkipToNext();
+                                } else if (index > 0) {
+                                    onSkipToPrevious();
+                                } else {
+                                    mQueueManager.clearCurrent();
+                                    handleStopRequest(null);
+                                }
+                                MusicProvider.getInstance().removeMusicEntity(musicId);
+                                mQueueManager.updateCurrentQueue();
+                                break;
+                            default:
+                                if (size >= 2) {
+                                    onSkipToNext();
+                                } else {
+                                    mQueueManager.clearCurrent();
+                                    handleStopRequest(null);
+                                }
+                                MusicProvider.getInstance().removeMusicEntity(musicId);
+                                mQueueManager.updateCurrentQueue();
+                                break;
+                        }
+                    } else {
+                        MusicProvider.getInstance().removeMusicEntity(extras.getString(MUSIC_ID, null));
+                        mQueueManager.updateCurrentQueue();
+                    }
+                    break;
+                case CLEAR_QUEUE:
+                    MusicProvider.getInstance().clearMusicList();
+                    mQueueManager.clearCurrent();
+                    handleStopRequest(null);
+                    mQueueManager.updateCurrentQueue();
+                    break;
+                default:
+                    break;
+            }
         }
 
         @Override
@@ -393,9 +447,11 @@ public class PlaybackManager implements Playback.Callback {
             currRepeatMode = repeatMode;
             mServiceCallback.onRepeatModeUpdated(repeatMode);
             if (currRepeatMode == PlaybackStateCompat.REPEAT_MODE_NONE) {
+                //顺序播放
                 shouldPlayNext = mQueueManager.getCurrentIndex() != mQueueManager.getCurrentQueueSize() - 1;
                 shouldPlayPre = mQueueManager.getCurrentIndex() != 0;
             } else {
+                //单曲循环和列表循环
                 shouldPlayNext = true;
                 shouldPlayPre = true;
             }

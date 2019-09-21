@@ -5,6 +5,7 @@
     <dimen name="media_item_text_margin_start">60dp</dimen>
     <dimen name="dp_16">16dp</dimen>
     <dimen name="dp_8">8dp</dimen>
+    <dimen name="dp_5">5dp</dimen>
     <dimen name="dp_10">10dp</dimen>
     <dimen name="dp_1">1dp</dimen>
     <dimen name="dp_2">2dp</dimen>
@@ -13,6 +14,7 @@
     <dimen name="dp_64">64dp</dimen>
     <dimen name="dp_24">24dp</dimen>
     <dimen name="dp_56">56dp</dimen>
+    <dimen name="dp_50">50dp</dimen>
     <dimen name="dp_48">48dp</dimen>
     <dimen name="dp_32">32dp</dimen>
     <dimen name="dp_36">36dp</dimen>
@@ -31,5 +33,7 @@
     <dimen name="sp_14">14sp</dimen>
     <dimen name="sp_12">12sp</dimen>
     <dimen name="sp_15">15sp</dimen>
+    <dimen name="dp_15">15dp</dimen>
+
 
 </resources>

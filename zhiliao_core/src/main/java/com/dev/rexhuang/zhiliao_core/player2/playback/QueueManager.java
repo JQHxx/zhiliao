@@ -67,6 +67,14 @@ public class QueueManager {
     }
 
     /**
+     * 清空播放状态，用于什么都没播放的状态
+     */
+    public void clearCurrent() {
+        mCurrentIndex = -1;
+        mPlayingQueue = QueueHelper.getPlayingQueue(mMusicProvider);
+    }
+
+    /**
      * 根据传入的媒体id来更新此媒体的下标并通知
      */
     public boolean setCurrentQueueItem(String mediaId) {
@@ -170,6 +178,18 @@ public class QueueManager {
         }
         mCurrentIndex = Math.max(index, 0);
         mListener.onQueueUpdated(newQueue);
+    }
+
+    /**
+     * 更新改变过的歌单
+     */
+    protected void updateCurrentQueue() {
+        MediaSessionCompat.QueueItem currentMusic = getCurrentMusic();
+        mPlayingQueue = QueueHelper.getPlayingQueue(mMusicProvider);
+        if (currentMusic != null) {
+            mCurrentIndex = QueueHelper.getMusicIndexOnQueue(mPlayingQueue, currentMusic.getDescription().getMediaId());
+        }
+        mListener.onQueueUpdated(mPlayingQueue);
     }
 
 

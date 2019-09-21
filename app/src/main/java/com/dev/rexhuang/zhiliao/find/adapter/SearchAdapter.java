@@ -2,6 +2,7 @@ package com.dev.rexhuang.zhiliao.find.adapter;
 
 import android.support.v4.media.MediaDescriptionCompat;
 import android.support.v4.media.MediaMetadataCompat;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -9,6 +10,7 @@ import androidx.annotation.Nullable;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.dev.rexhuang.zhiliao.R;
+import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 
 import java.util.List;
 
@@ -16,21 +18,20 @@ import java.util.List;
  * *  created by RexHuang
  * *  on 2019/8/10
  */
-public class SearchAdapter extends BaseQuickAdapter<MediaMetadataCompat, BaseViewHolder> {
-    public SearchAdapter(int layoutResId, @Nullable List<MediaMetadataCompat> data) {
+public class SearchAdapter extends BaseQuickAdapter<MusicEntity, BaseViewHolder> {
+    public SearchAdapter(int layoutResId, @Nullable List<MusicEntity> data) {
         super(layoutResId, data);
     }
 
     @Override
-    protected void convert(@NonNull BaseViewHolder helper, MediaMetadataCompat item) {
+    protected void convert(@NonNull BaseViewHolder helper, MusicEntity item) {
         if (this.mLayoutResId == R.layout.fragment_media_list_item) {
-            MediaDescriptionCompat descriptionCompat = item.getDescription();
-            helper.setText(R.id.title, descriptionCompat.getTitle());
-            helper.setText(R.id.description, descriptionCompat.getSubtitle());
+            helper.setText(R.id.title, item.getName());
+            helper.setText(R.id.description, item.getSingers().get(0).getName());
         } else if (this.mLayoutResId == R.layout.item_music){
-            MediaDescriptionCompat descriptionCompat = item.getDescription();
-            helper.setText(R.id.tv_title,descriptionCompat.getTitle());
-            helper.setText(R.id.tv_artist,descriptionCompat.getSubtitle());
+            helper.setText(R.id.tv_title,item.getName());
+            helper.setText(R.id.tv_artist,item.getSingers().get(0).getName());
+            helper.addOnClickListener(R.id.iv_more);
 //            Glide.with(mContext).load(descriptionCompat.getIconUri())
 //                    .into((ImageView) helper.getView(R.id.iv_cover));
         }

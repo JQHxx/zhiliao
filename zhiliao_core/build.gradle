@@ -63,6 +63,7 @@ dependencies {
 
     //Recyclerview
     api 'com.github.CymChad:BaseRecyclerViewAdapterHelper:2.9.47'
+    api 'com.github.1002326270xc:LayoutManager-FlowLayout:v1.8'
 
     //Retrofit
     api 'com.squareup.retrofit2:retrofit:2.6.0'
@@ -75,6 +76,7 @@ dependencies {
     //Loading
     api 'com.victor:lib:1.0.4'
     api 'com.wang.avi:library:2.1.3'
+    api 'com.dyhdyh.loadingbar2:loadingbar:2.0.1'
 
     //Log
     api 'com.orhanobut:logger:2.2.0'

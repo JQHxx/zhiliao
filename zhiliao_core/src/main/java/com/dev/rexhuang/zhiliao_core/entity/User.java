@@ -4,15 +4,13 @@ package com.dev.rexhuang.zhiliao_core.entity;
  * *  created by RexHuang
  * *  on 2019/9/4
  */
-public class User {
+public class User extends ZhiliaoEntity{
 
     /**
      * code : 0
      * data : {"id":"172911","email":"562520840@qq.com","phonenumber":null,"avatar":"","nickname":"rexRestFormApp2","status":"","join_time":"2019-07-11T12:51:55.000Z","factory":"","cicada":"1","token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMTcyOTExIiwiZXhwIjoxNTc1MzQ0Mjc1LCJpYXQiOjE1Njc1NjgyNzV9.CYTb8QrIih1sCrxMf5fo4Fj_rSLYHGiw96vqPK5fjQQ","token_expired_at":"2019-12-03T03:37:55.039Z"}
      */
 
-    private int code;
-    private String message;
     private DataEntity data;
 
     public int getCode() {

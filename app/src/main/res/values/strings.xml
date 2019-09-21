@@ -5,6 +5,21 @@
     <string name="title_notifications">Notifications</string>
     <string name="logo">logo</string>
     <string name="close">关闭</string>
+    <string name="next_to_play">下一首播放</string>
+    <string name="add_to_queue">加到歌单</string>
+    <string name="download">下载</string>
+    <string name="share">分享</string>
+    <string name="sing_info">查看歌手</string>
+    <string name="album_info">查看专辑</string>
+    <string name="record_histroy">搜索历史</string>
+    <string name="clear_record_hint">是否要清空搜索历史?</string>
+    <string name="play_all">全部播放</string>
+    <string name="login_user_hint">Username/Email/PhoneNumber</string>
+    <string name="login_password_hint">Verify</string>
+    <string name="login_text">Log In</string>
+    <string name="get_verify">Get Verify</string>
+    <string name="or_sign_up">- or Sign Up -</string>
+    <string name="log_in_to_zhiliao_music">Log In to Zhiliao Music</string>
 
     <string-array name="play_mode_text">
         <item>顺序播放</item>

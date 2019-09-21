@@ -13,7 +13,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog;
  * *  created by RexHuang
  * *  on 2019/9/16
  */
-public class QueueDialogHelper {
+public class DialogHelper {
 
     public static BottomSheetDialog createQueueDialog(Activity context) {
         //初始化BottomSheetDialog
@@ -55,5 +55,28 @@ public class QueueDialogHelper {
         }
         queueDialog.show();*/
         return queueDialog;
+    }
+
+    public static BottomSheetDialog createMoreDialog(Activity context) {
+        //初始化BottomSheetDialog
+        BottomSheetDialog moreDialog = new BottomSheetDialog(context);
+        //填入布局
+        View view = View.inflate(context, R.layout.dialog_more, null);
+        moreDialog.setContentView(view);
+
+        Window window = moreDialog.getWindow();
+        WindowManager.LayoutParams lp = null;
+        if (window != null) {
+            lp = window.getAttributes();
+            lp.gravity = Gravity.BOTTOM;
+            lp.width = WindowManager.LayoutParams.MATCH_PARENT;
+            lp.height = WindowManager.LayoutParams.WRAP_CONTENT;
+            window.setAttributes(lp);
+            window.findViewById(R.id.design_bottom_sheet).setBackgroundResource(android.R.color.transparent);
+        }
+
+        //设置Dialog的操作逻辑
+        moreDialog.setCanceledOnTouchOutside(true);
+        return moreDialog;
     }
 }

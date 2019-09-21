@@ -21,6 +21,7 @@ public class MusicEntity implements Parcelable {
      * normal : https://static.mebtte.com/music/ab56fabbca609239da839960dd7a5b7f.mp3
      * accompany :
      * hq :
+     * mv :
      * singers : [{"id":"d9zsnwcjd5q","avatar":"https://static.mebtte.com/figure_avatar/81b8f2ec1c8e9dea8d29f9a9312b13aa.jpeg","name":"周杰伦","alias":""}]
      * cover_from : null
      */
@@ -33,6 +34,7 @@ public class MusicEntity implements Parcelable {
     private String normal;
     private String accompany;
     private String hq;
+    private String mv;
     private Object cover_from;
     private List<SingersEntity> singers;
     private transient Bitmap coverBitmap;
@@ -99,6 +101,14 @@ public class MusicEntity implements Parcelable {
 
     public void setHq(String hq) {
         this.hq = hq;
+    }
+
+    public String getMv() {
+        return mv;
+    }
+
+    public void setMv(String mv) {
+        this.mv = mv;
     }
 
     public Object getCover_from() {

@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.v4.media.session.MediaSessionCompat;
+import android.support.v4.media.session.PlaybackStateCompat;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -13,15 +15,11 @@ import android.widget.Toast;
 
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
 import com.bumptech.glide.request.RequestOptions;
-import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.dev.rexhuang.zhiliao.detail.DetailActivity;
-import com.dev.rexhuang.zhiliao.find.queue.QueueAdapter;
 import com.dev.rexhuang.zhiliao.search.SearchFragment;
 import com.dev.rexhuang.zhiliao_core.base.BaseActivity;
 import com.dev.rexhuang.zhiliao_core.base.BaseFragment;
@@ -32,13 +30,13 @@ import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 import com.dev.rexhuang.zhiliao_core.player2.manager.OnPlayerEventListener;
 import com.dev.rexhuang.zhiliao_core.utils.AnimHelper;
-import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.mikepenz.iconics.view.IconicsTextView;
 import com.orhanobut.logger.Logger;
 
 import java.lang.ref.WeakReference;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -68,10 +66,7 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
     //Animator
     private ObjectAnimator cover_play;
 
-    private BottomSheetDialog queueDialog;
-    private TextView tv_close;
-    private QueueAdapter queueAdapter;
-    private RecyclerView recyclerView;
+    private QueueDialog queueDialog;
     private OnPlayerEventListener onPlayerEventListener;
     private SwitchHandler handler = new SwitchHandler(this);
     private static final int UPDATE_QUEUE = 102000000;
@@ -224,24 +219,28 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
                 ValueAnimator.INFINITE, ValueAnimator.RESTART);
         onPlayerEventListener = new OnPlayerEventListener() {
             @Override
+            public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
+                if (queueDialog != null) {
+                    queueDialog.setNewData(MusicManager.getInstance().getPlayList());
+                }
+            }
+
+            @Override
             public void onMusicSwitch(MusicEntity musicEntity) {
                 showPlaying(musicEntity, false, true);
-                if (queueAdapter != null) {
-                    queueAdapter.setNewData(MusicManager.getInstance().getPlayList());
-                    queueAdapter.notifyDataSetChanged();
+                if (queueDialog != null) {
+                    queueDialog.setNewData(MusicManager.getInstance().getPlayList());
                 }
             }
 
             @Override
             public void onPlayerStart() {
                 showPlaying(MusicManager.getInstance().getNowPlayingSongInfo(), true, false);
-//                song_play_button.setText(pause);
-//                playAnimation();
             }
 
             @Override
             public void onPlayerPause() {
-                showStopped();
+                showPaused();
             }
 
             @Override
@@ -251,7 +250,7 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
 
             @Override
             public void onPlayCompletion(MusicEntity musicEntity) {
-                showStopped();
+                showPaused();
             }
 
             @Override
@@ -266,7 +265,25 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
 
             @Override
             public void onRepeatModeChanged(int repeatMode) {
-                Toast.makeText(get_mActivity(), "模式变成 : " + repeatMode, Toast.LENGTH_SHORT).show();
+                if (queueDialog != null) {
+                    queueDialog.onRepeatModeChanged(repeatMode);
+                }
+                String mode;
+                switch (repeatMode) {
+                    case PlaybackStateCompat.REPEAT_MODE_NONE:
+                        mode = "顺序播放";
+                        break;
+                    case PlaybackStateCompat.REPEAT_MODE_ONE:
+                        mode = "单曲循环";
+                        break;
+                    case PlaybackStateCompat.REPEAT_MODE_ALL:
+                        mode = "列表循环";
+                        break;
+                    default:
+                        mode = "顺序播放";
+                        break;
+                }
+                Toast.makeText(get_mActivity(), mode, Toast.LENGTH_SHORT).show();
             }
         };
         MusicManager.getInstance().addPlayerEventListener(onPlayerEventListener);
@@ -320,35 +337,7 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
 
     private void showQueueDialog() {
         if (queueDialog == null) {
-            queueAdapter = new QueueAdapter(R.layout.item_queue, MusicManager.getInstance().getPlayList());
-            queueDialog = QueueDialogHelper.createQueueDialog(getActivity());
-            tv_close = queueDialog.findViewById(R.id.tv_close);
-            recyclerView = queueDialog.findViewById(R.id.rcv_songs);
-            recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
-            recyclerView.setAdapter(queueAdapter);
-            tv_close.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    hideQueueDialog();
-                }
-            });
-            queueAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
-                @Override
-                public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                    MusicManager.getInstance().playMusicByIndex(position);
-
-                }
-            });
-            queueAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
-                @Override
-                public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-                    if (view.getId() == R.id.iv_more) {
-                    }
-                }
-            });
-        }
-        if (MusicManager.getInstance().getNowPlayingIndex() >= 0) {
-            recyclerView.scrollToPosition(MusicManager.getInstance().getNowPlayingIndex());
+            queueDialog = new QueueDialog(getActivity());
         }
         queueDialog.show();
     }
@@ -360,6 +349,13 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
     }
 
     private void showStopped() {
+        showPaused();
+        song_description.setText("知了音乐 让生活充满音乐");
+        song_cover.setRotation(0f);
+        song_cover.setImageDrawable(getActivity().getDrawable(R.drawable.diskte));
+    }
+
+    private void showPaused() {
         song_play_button.setText(play);
         pauseAnimation();
     }
@@ -437,8 +433,6 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
             ZhiliaoSwitchFragment zhiliaoSwitchFragment = zhiliaoSwitchFragmentWeakReference.get();
             switch (msg.what) {
                 case UPDATE_QUEUE:
-                    zhiliaoSwitchFragment.queueAdapter.setNewData(MusicManager.getInstance().getPlayList());
-                    zhiliaoSwitchFragment.queueAdapter.notifyDataSetChanged();
             }
         }
     }

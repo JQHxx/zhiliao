@@ -21,4 +21,6 @@
     <color name="searchbar">#222739</color>
     <color name="searchbar_edit_layout">#2F3346</color>
     <color name="queue_dialog">#1C222C</color>
+    <color name="hint_color">#868993</color>
+    <color name="login_backgroud">#3d3d3d</color>
 </resources>

@@ -1,8 +1,9 @@
-package com.dev.rexhuang.zhiliao;
+package com.dev.rexhuang.zhiliao.splash;
 
 import android.os.Bundle;
 import android.view.View;
 
+import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.timer.BaseTimerTask;
 import com.dev.rexhuang.zhiliao.timer.ISplashListener;
 import com.dev.rexhuang.zhiliao.timer.ITimerListener;
@@ -27,6 +28,10 @@ public class SplashFragment extends ZhiliaoFragment implements ITimerListener {
 
     @OnClick(R.id.tv_spalsh_count)
     void onClickSplash() {
+        if (mTimer != null) {
+            mTimer.cancel();
+            mTimer = null;
+        }
         startToMain();
     }
 

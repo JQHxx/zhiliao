@@ -3,6 +3,7 @@ package com.dev.rexhuang.zhiliao.detail;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -92,6 +93,10 @@ public class CoverFragment extends Fragment {
         civ_cover.setImageBitmap(bitmap);
     }
 
+    public void setCoverDrawable(Drawable drawable) {
+        civ_cover.setImageDrawable(drawable);
+    }
+
     public void setCoverRotation(float rotation) {
         civ_cover.setRotation(rotation);
         cover_play = AnimHelper.rotate(civ_cover, "rotation", rotation,
@@ -138,4 +143,6 @@ public class CoverFragment extends Fragment {
         super.onDestroyView();
 
     }
+
+
 }

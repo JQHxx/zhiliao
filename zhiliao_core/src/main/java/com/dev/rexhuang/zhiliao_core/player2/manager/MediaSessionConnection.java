@@ -13,6 +13,7 @@ import android.support.v4.media.session.PlaybackStateCompat;
 import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 import com.dev.rexhuang.zhiliao_core.player2.MusicService;
 import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
+import com.google.android.exoplayer2.C;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -225,6 +226,7 @@ public class MediaSessionConnection {
                             listener.onPlayerPause();
                             break;
                         case PlaybackStateCompat.STATE_STOPPED:
+                            nowPlaying = NOTHING_PLAYING;
                             listener.onPlayerStop();
                             break;
                         case PlaybackStateCompat.STATE_ERROR:
@@ -267,6 +269,11 @@ public class MediaSessionConnection {
         @Override
         public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
             super.onQueueChanged(queue);
+            //状态监听
+            CopyOnWriteArrayList<OnPlayerEventListener> mPlayerEventListeners = MusicManager.getInstance().getPlayerEventListeners();
+            for (OnPlayerEventListener listener : mPlayerEventListeners) {
+                listener.onQueueChanged(queue);
+            }
         }
 
         /**

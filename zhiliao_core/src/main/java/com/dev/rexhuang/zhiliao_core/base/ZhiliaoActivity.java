@@ -25,6 +25,7 @@ public abstract class ZhiliaoActivity extends PermissionCheckActivity {
             int option = View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
                     | View.SYSTEM_UI_FLAG_LAYOUT_STABLE;
             decorView.setSystemUiVisibility(option);
+            //设置系统状态栏颜色
             getWindow().setStatusBarColor(Color.TRANSPARENT);
         }
         ActionBar actionBar = getSupportActionBar();

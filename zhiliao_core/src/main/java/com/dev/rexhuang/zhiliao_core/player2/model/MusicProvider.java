@@ -49,11 +49,35 @@ public class MusicProvider {
     }
 
     /**
+     * 清空播放列表
+     */
+    public synchronized void clearMusicList() {
+        mMusicEntityListById.clear();
+        mMusicListById.clear();
+    }
+
+    /**
      * 添加一首歌
      */
     public synchronized void addMusicEntity(MusicEntity musicEntity) {
         mMusicEntityListById.put(musicEntity.getId(), musicEntity);
         mMusicListById.put(musicEntity.getId(), convertToMediaMetadata(musicEntity));
+    }
+
+    /**
+     * 删除一首歌
+     */
+    public synchronized void removeMusicEntity(MusicEntity musicEntity) {
+        mMusicEntityListById.remove(musicEntity.getId());
+        mMusicListById.remove(musicEntity.getId());
+    }
+
+    /**
+     * 删除一首歌
+     */
+    public synchronized void removeMusicEntity(String musicId) {
+        mMusicListById.remove(musicId);
+        mMusicEntityListById.remove(musicId);
     }
 
     /**

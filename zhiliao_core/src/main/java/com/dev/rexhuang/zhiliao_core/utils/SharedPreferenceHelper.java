@@ -68,43 +68,51 @@ public class SharedPreferenceHelper {
     }
 
     public void putString(String key, String value) {
-        editor.putString(key, value);
-        editor.commit();
+        if (checkEditorNotNull(editor)) {
+            editor.putString(key, value);
+        }
     }
 
     public void putStringSet(String key, Set<String> values) {
-        editor.putStringSet(key, values);
-        editor.commit();
+        if (checkEditorNotNull(editor)) {
+            editor.putStringSet(key, values);
+        }
     }
 
     public void putInt(String key, int value) {
-        editor.putInt(key, value);
-        editor.commit();
+        if (checkEditorNotNull(editor)) {
+            editor.putInt(key, value);
+        }
     }
 
     public void putLong(String key, long value) {
-        editor.putLong(key, value);
-        editor.commit();
+        if (checkEditorNotNull(editor)) {
+            editor.putLong(key, value);
+        }
     }
 
     public void putFloat(String key, float value) {
-        editor.putFloat(key, value);
-        editor.commit();
+        if (checkEditorNotNull(editor)) {
+            editor.putFloat(key, value);
+        }
     }
 
     public void putBoolean(String key, boolean value) {
-        editor.putBoolean(key, value);
-        editor.commit();
+        if (checkEditorNotNull(editor)) {
+            editor.putBoolean(key, value);
+        }
     }
 
     public void remove(String key) {
-        editor.remove(key);
-        editor.commit();
+        if (checkEditorNotNull(editor)) {
+            editor.remove(key);
+        }
     }
 
-    public void clear(String name) {
-        editor.clear();
-        editor.commit();
+    public void clear() {
+        if (checkEditorNotNull(editor)) {
+            editor.clear();
+        }
         //todo 删除文件
     }
 
@@ -132,5 +140,22 @@ public class SharedPreferenceHelper {
         return sharedPreferences.getBoolean(key, defValue);
     }
 
+    public void commit() {
+        if (checkEditorNotNull(editor)) {
+            editor.commit();
+        }
+    }
 
+    public void apply() {
+        if (checkEditorNotNull(editor)) {
+            editor.apply();
+        }
+    }
+
+    private boolean checkEditorNotNull(SharedPreferences.Editor editor) {
+        if (editor == null) {
+            return false;
+        }
+        return true;
+    }
 }

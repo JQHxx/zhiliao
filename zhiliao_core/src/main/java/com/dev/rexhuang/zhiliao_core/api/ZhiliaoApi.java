@@ -30,7 +30,7 @@ public class ZhiliaoApi {
         @Override
         public void onError(int code, String message) {
             Toast.makeText(Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name()),
-                    "网络请求错误: 错误码 : " + code + " 错误信息 : " + message, Toast.LENGTH_SHORT).show();
+                    "网络请求错误: 错误码 : " + code + " 错误信息 : " + message, Toast.LENGTH_LONG).show();
         }
     };
 
@@ -57,7 +57,7 @@ public class ZhiliaoApi {
         @Override
         public void onFailure() {
             Toast.makeText(Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name()),
-                    "网络请求失败,请检查网络是否可用!", Toast.LENGTH_SHORT).show();
+                    "网络请求失败,请检查网络是否可用!", Toast.LENGTH_LONG).show();
         }
     };
 

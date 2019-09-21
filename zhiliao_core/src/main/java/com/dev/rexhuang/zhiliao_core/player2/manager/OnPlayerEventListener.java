@@ -5,7 +5,7 @@ import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 /**
  * 播放监听
  */
-public interface OnPlayerEventListener {
+public interface OnPlayerEventListener extends OnQueueEventListener{
     /**
      * 切歌回调
      */
@@ -41,8 +41,4 @@ public interface OnPlayerEventListener {
      */
     void onError(int errorCode, String errorMsg);
 
-    /**
-     * 歌单模式改变
-     */
-    void onRepeatModeChanged(int repeatMode);
 }

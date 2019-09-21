@@ -4,10 +4,11 @@ package com.dev.rexhuang.zhiliao_core.entity;
  * *  created by RexHuang
  * *  on 2019/9/16
  */
-public class LyricEntity {
+public class LyricEntity extends ZhiliaoEntity{
 
     /**
      * code : 0
+     * message : 错误信息
      * data : [00:28.050]我的青春 也不是没伤痕
      [00:33.950]是明白爱是信仰的延伸
      [00:40.020]什么特征 人缘还是眼神
@@ -46,7 +47,6 @@ public class LyricEntity {
      [03:43.160]进化成更好的人
      */
 
-    private int code;
     private String data;
 
     public int getCode() {
@@ -63,5 +63,13 @@ public class LyricEntity {
 
     public void setData(String data) {
         this.data = data;
+    }
+
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
     }
 }

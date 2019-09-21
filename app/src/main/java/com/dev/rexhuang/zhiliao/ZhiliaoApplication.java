@@ -2,6 +2,7 @@ package com.dev.rexhuang.zhiliao;
 
 import android.app.Application;
 
+import com.dev.rexhuang.zhiliao.login.UserManager;
 import com.dev.rexhuang.zhiliao_core.config.Zhiliao;
 import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 import com.dev.rexhuang.zhiliao_core.player2.notification.NotificationConstructor;
@@ -36,6 +37,7 @@ public class ZhiliaoApplication extends Application {
                 .setCreateSystemNotification(true)
                 .bulid();
         MusicManager.getInstance().setNotificationConstructor(notificationConstructor);
+        UserManager.init(this);
     }
 
 }
