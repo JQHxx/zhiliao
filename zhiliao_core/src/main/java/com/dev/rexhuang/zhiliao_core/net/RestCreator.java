@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit;
 
 import okhttp3.OkHttpClient;
 import retrofit2.Retrofit;
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
@@ -32,6 +33,7 @@ public class RestCreator {
                 .client(OkHttpHolder.OK_HTTP_CLIENT)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                 .build();
     }
 
@@ -47,11 +49,20 @@ public class RestCreator {
 
     private static final class RestServiceHolder {
         private static final RestService REST_SERVICE = RetrofitHolder.RETROFIT_CLIENT.create(RestService.class);
-
+        private static final NeteaseRestService NETEASE_SERVICE = RetrofitHolder.RETROFIT_CLIENT.create(NeteaseRestService.class);
+        private static final QQRestService QQ_SERVICE = RetrofitHolder.RETROFIT_CLIENT.create(QQRestService.class);
     }
 
     public static RestService getRestService() {
         return RestServiceHolder.REST_SERVICE;
+    }
+
+    public static NeteaseRestService getNeteaseRestService() {
+        return RestServiceHolder.NETEASE_SERVICE;
+    }
+
+    public static QQRestService getQQRestService() {
+        return RestServiceHolder.QQ_SERVICE;
     }
 
     public static final OkHttpClient getOkHttpClient() {

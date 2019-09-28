@@ -1,4 +1,4 @@
-package com.dev.rexhuang.zhiliao_core.api;
+package com.dev.rexhuang.zhiliao_core.api.zhiliao;
 
 import com.dev.rexhuang.zhiliao_core.entity.ZhiliaoEntity;
 

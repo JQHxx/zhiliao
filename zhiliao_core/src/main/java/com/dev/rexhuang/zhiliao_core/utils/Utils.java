@@ -37,7 +37,7 @@ public class Utils {
      * @return value of px
      */
     public static int dp2px(final float dpValue) {
-        final float scale = ((Context)Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name())).getResources().getDisplayMetrics().density;
+        final float scale = ((Context) Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name())).getResources().getDisplayMetrics().density;
         return (int) (dpValue * scale + 0.5f);
     }
 
@@ -48,7 +48,12 @@ public class Utils {
      * @return value of dp
      */
     public static int px2dp(final float pxValue) {
-        final float scale =((Context)Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name())).getResources().getDisplayMetrics().density;
+        final float scale = ((Context) Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name())).getResources().getDisplayMetrics().density;
         return (int) (pxValue / scale + 0.5f);
+    }
+
+    //判断是否是android6.0
+    public static boolean isMarshmallow() {
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M;
     }
 }

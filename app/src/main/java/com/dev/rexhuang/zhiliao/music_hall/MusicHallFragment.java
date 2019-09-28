@@ -2,13 +2,17 @@ package com.dev.rexhuang.zhiliao.music_hall;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
+import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.dev.rexhuang.zhiliao.MainActivity;
 import com.dev.rexhuang.zhiliao.R;
-import com.dev.rexhuang.zhiliao.event.MessageEvent;
 import com.dev.rexhuang.zhiliao.event.MusicHallEvent;
-import com.dev.rexhuang.zhiliao_core.api.ZhiliaoApi;
+import com.dev.rexhuang.zhiliao_core.api.musiclake.MusicLakeApi;
+import com.dev.rexhuang.zhiliao_core.api.qq.QQMusicApi;
+import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoMainFragment;
+import com.dev.rexhuang.zhiliao_core.entity.ArtistsDataInfo;
+import com.dev.rexhuang.zhiliao_core.entity.BannerEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListEntity;
 import com.dev.rexhuang.zhiliao_core.entity.User;
 import com.dev.rexhuang.zhiliao.music_hall.adapter.MultipleItemsCreator;
@@ -30,6 +34,7 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
+import butterknife.OnClick;
 
 /**
  * *  created by RexHuang
@@ -45,6 +50,7 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
 
     @BindView(R.id.swipe_layout)
     SwipeRefreshLayout swipe_layout;
+
 
     //    @BindView(R2.id.rv_song_list)
     //    RecyclerView rv_song_list;
@@ -84,7 +90,33 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
                 MusicHallFragment.this.songListEntity = songListEntity;
                 creator = new MultipleItemsCreator(MusicHallFragment.this.songListEntity.getData(), imagesArray);
                 multipleRecyclerAdapter = new MultipleRecyclerAdapter(_mActivity, creator.create());
+                multipleRecyclerAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
+                    @Override
+                    public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
+                        switch (view.getId()) {
+                            case R.id.layout_singer:
+                                ((MainActivity)getActivity()).getSupportDelegate().start(new ArtistListFragment());
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                });
                 rv_music_hall.setAdapter(multipleRecyclerAdapter);
+                MusicLakeApi.getBanner(null, new ISuccess<BannerEntity>() {
+                    @Override
+                    public void onSuccess(BannerEntity response) {
+                        if (response != null) {
+                            List<BannerEntity.BannersEntity> bannersEntities = response.getBanners();
+                            List<String> images = new ArrayList<>();
+                            for (BannerEntity.BannersEntity bannersEntity : bannersEntities) {
+                                images.add(bannersEntity.getImageUrl());
+                            }
+                            creator.setImagesArray(images);
+                            multipleRecyclerAdapter.setNewData(creator.create());
+                        }
+                    }
+                }, null, null);
             }
         }, null, null);
         swipe_layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {

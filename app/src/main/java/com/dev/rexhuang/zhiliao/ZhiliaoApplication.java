@@ -6,6 +6,7 @@ import com.dev.rexhuang.zhiliao.login.UserManager;
 import com.dev.rexhuang.zhiliao_core.config.Zhiliao;
 import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 import com.dev.rexhuang.zhiliao_core.player2.notification.NotificationConstructor;
+import com.dev.rexhuang.zhiliao_core.player2.playback.download.ExoDownload;
 
 import me.yokeyword.fragmentation.Fragmentation;
 
@@ -37,6 +38,8 @@ public class ZhiliaoApplication extends Application {
                 .setCreateSystemNotification(true)
                 .bulid();
         MusicManager.getInstance().setNotificationConstructor(notificationConstructor);
+        ExoDownload.initExoDownload(this);
+        ExoDownload.getInstance().setOpenCache(true);
         UserManager.init(this);
     }
 

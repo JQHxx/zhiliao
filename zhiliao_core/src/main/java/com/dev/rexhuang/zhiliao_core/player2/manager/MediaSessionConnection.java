@@ -226,7 +226,7 @@ public class MediaSessionConnection {
                             listener.onPlayerPause();
                             break;
                         case PlaybackStateCompat.STATE_STOPPED:
-                            nowPlaying = NOTHING_PLAYING;
+//                            nowPlaying = NOTHING_PLAYING;
                             listener.onPlayerStop();
                             break;
                         case PlaybackStateCompat.STATE_ERROR:
@@ -269,6 +269,7 @@ public class MediaSessionConnection {
         @Override
         public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
             super.onQueueChanged(queue);
+            nowPlaying = MusicProvider.getInstance().getMusicList().size() <= 0 ? NOTHING_PLAYING : nowPlaying;
             //状态监听
             CopyOnWriteArrayList<OnPlayerEventListener> mPlayerEventListeners = MusicManager.getInstance().getPlayerEventListeners();
             for (OnPlayerEventListener listener : mPlayerEventListeners) {

@@ -26,6 +26,7 @@ import com.google.android.exoplayer2.ext.rtmp.RtmpDataSourceFactory;
 import com.google.android.exoplayer2.extractor.DefaultExtractorsFactory;
 import com.google.android.exoplayer2.offline.FilteringManifestParser;
 import com.google.android.exoplayer2.offline.StreamKey;
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource;
 import com.google.android.exoplayer2.source.ExtractorMediaSource;
 import com.google.android.exoplayer2.source.MediaSource;
 import com.google.android.exoplayer2.source.TrackGroupArray;
@@ -173,7 +174,7 @@ public final class ExoPlayback implements Playback {
             }
 
             if (mExoPlayer == null) {
-                //轨道选择
+                //曲目选择
                 TrackSelection.Factory trackSelectionFactory;
                 if (abrAlgorithm.equals(ABR_ALGORITHM_DEFAULT)) {
                     trackSelectionFactory = new AdaptiveTrackSelection.Factory();
@@ -187,15 +188,17 @@ public final class ExoPlayback implements Playback {
                                 DefaultRenderersFactory.EXTENSION_RENDERER_MODE_OFF;
                 DefaultRenderersFactory renderersFactory = new DefaultRenderersFactory(mContext, extensionRendererMode);
 
-                //轨道选择
+                //曲目选择，使用默认就好
                 trackSelector = new DefaultTrackSelector(trackSelectionFactory);
                 trackSelector.setParameters(trackSelectorParameters);
 
                 DefaultDrmSessionManager<FrameworkMediaCrypto> drmSessionManager = null;
 
+                //创建一个ExoPlayer实例
                 mExoPlayer = ExoPlayerFactory.newSimpleInstance(mContext, renderersFactory,
                         trackSelector, drmSessionManager);
 
+                //注册播放事件监听和日志调试监听(adb logcat | grep 'EventLogger\|ExoPlayerImpl')
                 mExoPlayer.addListener(mEventListener);
                 mExoPlayer.addAnalyticsListener(new EventLogger(trackSelector));
             }
@@ -206,19 +209,25 @@ public final class ExoPlayback implements Playback {
                     .build();
             mExoPlayer.setAudioAttributes(audioAttributes, true);//第二个参数能使ExoPlayer自动管理焦点
 
+            //DataSource.Factory用来构造MediaSource
             DataSource.Factory dataSourceFactory = ExoDownload.getInstance().buildDataSourceFactory(mContext);
 
+            //构造ExoPlayer的实例对象，并将对象传达给Exoplayer，
+            //有四种类型 ：DashMediaSource/SsMediaSource/HlsMediaSource/ProgressiveMediaSource
+            //还提供ConcatenatingMediaSource/ClippingMediaSource/LoopingMediaSource/MergingMediaSource,这些MediaSource实现可通过合成实现更复杂的播放功能
+            //ConcatenatingMediaSource可以提供播放列表的功能
             MediaSource mediaSource = buildMediaSource(dataSourceFactory, Uri.parse(source), null);
-
             mExoPlayer.prepare(mediaSource);
         }
 
         if (isPlayWhenReady) {
+            //操作ExoPlayer用于play/pause
             mExoPlayer.setPlayWhenReady(true);
         }
     }
 
     private MediaSource buildMediaSource(DataSource.Factory dataSourceFactory, Uri uri, @Nullable String overrideExtension) {
+        //Exoplayer提供的工具用来检测Uri的类型
         @C.ContentType int type = Util.inferContentType(uri, overrideExtension);
         switch (type) {
             case C.TYPE_DASH:
@@ -267,6 +276,7 @@ public final class ExoPlayback implements Playback {
 
     @Override
     public void seekTo(long position) {
+        //seek within the media
         if (mExoPlayer != null) {
             mExoPlayer.seekTo(position);
         }
@@ -378,21 +388,30 @@ public final class ExoPlayback implements Playback {
     private final class ExoPlayerEventListener implements Player.EventListener {
         @Override
         public void onTimelineChanged(Timeline timeline, @Nullable Object manifest, int reason) {
-            // Nothing to do.
+            // 在刷新时间线和/或清单时调用。请注意，如果时间轴已更改，那么位置不连续也可能发生。
+            // 例如，由于从时间轴添加或删除了时间段，因此当前时间段索引可能已更改。
+            // 这不会通过单独调用onPositionDiscontinuity（int）。
         }
 
         @Override
         public void onTracksChanged(TrackGroupArray trackGroups, TrackSelectionArray trackSelections) {
-            // Nothing to do.
+            // 当可用或选定的曲目改变时调用
         }
 
         @Override
         public void onLoadingChanged(boolean isLoading) {
-            // Nothing to do.
+            // 在播放器启动或停止加载源时调用。
         }
 
+        /**
+         * Player.STATE_IDLE    初始化状态，当播放器状态为stopped或者failed
+         * Player.STATE_BUFFERING    加载中状态
+         * Player.STATE_READY    可以播放的状态
+         * Player.STATE_ENDED    已经播放完当前媒体的状态
+         */
         @Override
         public void onPlayerStateChanged(boolean playWhenReady, int playbackState) {
+            // 当Player.getPlayWhenReady()或Player.getPlaybackState()返回的值更改时调用。
             switch (playbackState) {
                 case Player.STATE_IDLE:
                 case Player.STATE_BUFFERING:
@@ -411,6 +430,7 @@ public final class ExoPlayback implements Playback {
 
         @Override
         public void onPlayerError(ExoPlaybackException error) {
+            //发生错误时调用。调用此方法后，播放状态会即转换为Player.STATE_IDLE。播放器实例仍然可以使用，并且如果不再需要调用Player.release（）
             final String what;
             switch (error.type) {
                 case ExoPlaybackException.TYPE_SOURCE:
@@ -434,28 +454,35 @@ public final class ExoPlayback implements Playback {
 
         @Override
         public void onPositionDiscontinuity(int reason) {
-            // Nothing to do.
+            // 在不更改时间线的情况下发生位置不连续时调用。
+            // 当当前窗口或周期索引改变时（由于回放从时间线中的一个周期过渡到下一个周期），
+            // 或者当回放位置在当前正在播放的周期内跳变时（发生寻道），就会发生位置不连续执行或源在内部引入不连续性时）。
+            // 如果由于更改时间线而发生位置不连续，则不会调用此方法。在这种情况下，将调用onTimelineChanged（Timeline，Object，int）。
         }
 
         @Override
         public void onPlaybackParametersChanged(PlaybackParameters playbackParameters) {
-            // Nothing to do.
+            // 当前播放参数更改时调用。播放参数可能会因调用Player.setPlaybackParameters（PlaybackParameters）而改变，
+            // 或者播放器本身可能会更改它们（例如，如果音频播放切换为直通模式，则无法再进行速度调节）。
         }
 
         @Override
         public void onSeekProcessed() {
-            // Nothing to do.
+            // 当播放器处理完所有pending seek请求时调用。
+            // 保证在播放器状态改变并调用了onPlayerStateChanged（boolean，int）之后调用。
         }
 
         @Override
         public void onRepeatModeChanged(int repeatMode) {
-            // Nothing to do.
+            // 当Player.getRepeatMode() 返回值更改时调用.
         }
 
         @Override
         public void onShuffleModeEnabledChanged(boolean shuffleModeEnabled) {
-            // Nothing to do.
+            // 当Player.getShuffleModeEnabled() 返回值更改时调用.
         }
+
+
     }
 
 }

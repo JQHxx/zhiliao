@@ -9,6 +9,7 @@ import com.google.android.exoplayer2.offline.DownloadManager;
 import com.google.android.exoplayer2.offline.DownloadService;
 import com.google.android.exoplayer2.scheduler.PlatformScheduler;
 import com.google.android.exoplayer2.scheduler.Scheduler;
+import com.google.android.exoplayer2.ui.DownloadNotificationUtil;
 import com.google.android.exoplayer2.util.Util;
 
 /**
@@ -49,6 +50,7 @@ public class ExoDownloadService extends DownloadService {
 
     @Override
     protected Notification getForegroundNotification(DownloadManager.TaskState[] taskStates) {
-        return super.getForegroundNotification(taskStates);
+        return DownloadNotificationUtil.buildProgressNotification(this, R.drawable.exo_controls_play,
+                CHANNEL_ID, null, null, taskStates);
     }
 }

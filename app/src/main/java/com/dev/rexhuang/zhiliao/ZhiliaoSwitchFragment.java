@@ -29,6 +29,7 @@ import com.dev.rexhuang.zhiliao_core.callback.SwitchFragmentListener;
 import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 import com.dev.rexhuang.zhiliao_core.player2.manager.OnPlayerEventListener;
+import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
 import com.dev.rexhuang.zhiliao_core.utils.AnimHelper;
 import com.mikepenz.iconics.view.IconicsTextView;
 import com.orhanobut.logger.Logger;
@@ -221,7 +222,10 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
             @Override
             public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
                 if (queueDialog != null) {
-                    queueDialog.setNewData(MusicManager.getInstance().getPlayList());
+                    queueDialog.onQueueChanged(queue);
+                }
+                if (MusicManager.getInstance().getPlayList().size() <= 0) {
+                    showStopped();
                 }
             }
 
@@ -245,7 +249,7 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
 
             @Override
             public void onPlayerStop() {
-                showStopped();
+                showPaused();
             }
 
             @Override
@@ -351,6 +355,7 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
     private void showStopped() {
         showPaused();
         song_description.setText("知了音乐 让生活充满音乐");
+        Glide.with(getActivity()).clear(song_cover);
         song_cover.setRotation(0f);
         song_cover.setImageDrawable(getActivity().getDrawable(R.drawable.diskte));
     }

@@ -140,8 +140,10 @@ public class CoverFragment extends Fragment {
     public void onDestroyView() {
         Logger.t(TAG).d("onDestroyView");
         stopAnimation();
+        if (mUnbinder != null) {
+            mUnbinder.unbind();
+        }
         super.onDestroyView();
-
     }
 
 

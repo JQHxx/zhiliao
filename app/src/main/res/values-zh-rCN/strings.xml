@@ -21,4 +21,5 @@
     <string name="get_verify">获取验证码</string>
     <string name="or_sign_up">- 注 册 -</string>
     <string name="log_in_to_zhiliao_music">知 了 音 乐</string>
+    <string name="permission_hint">软件必须获取相关权限</string>
 </resources>

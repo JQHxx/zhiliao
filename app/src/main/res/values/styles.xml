@@ -1,15 +1,29 @@
 <resources>
 
+    <attr name="toolbar_color" format="reference"/>
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="AppTheme.Cool.Black" parent="AppTheme">
+        <!--<item name="colorPrimaryDark">@color/toolbar</item>-->
+        <item name="toolbar_color">@color/toolbar</item>
+    </style>
+
+    <style name="AppTheme.Elegant.White" parent="AppTheme">
+        <item name="toolbar_color">@color/white</item>
+    </style>
+
     <style name="AppTheme.Splash" parent="AppTheme">
         <item name="android:windowFullscreen">true</item>
+    </style>
+    
+    <style name="AppTheme.Cool.Black.MainActivity" parent="AppTheme.Cool.Black">
+
     </style>
 
     <style name="BottomSheetDialogStyle" parent="Theme.Design.BottomSheetDialog">
@@ -22,6 +36,10 @@
         <!-- 无标题 -->
         <item name="android:windowNoTitle">true</item>
         <item name="android:background">@android:color/transparent</item>
+    </style>
+
+    <style name="TextApperance.Album.Title" parent="@style/TextAppearance.AppCompat.Large">
+        <item name="android:textSize">29sp</item>
     </style>
 
 </resources>

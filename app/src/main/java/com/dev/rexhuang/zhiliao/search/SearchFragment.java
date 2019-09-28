@@ -40,7 +40,7 @@ import com.dev.rexhuang.zhiliao.data.RecordDbDao;
 import com.dev.rexhuang.zhiliao.detail.DetailActivity;
 import com.dev.rexhuang.zhiliao.find.adapter.SearchAdapter;
 import com.dev.rexhuang.zhiliao.login.UserManager;
-import com.dev.rexhuang.zhiliao_core.api.ZhiliaoApi;
+import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
 import com.dev.rexhuang.zhiliao_core.base.BaseActivity;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoFragment;
 import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
@@ -191,8 +191,9 @@ public class SearchFragment extends ZhiliaoFragment {
             from = getArguments().getString(BaseActivity.FRGMENT_FROM);
         }
         if (TextUtils.equals(MainSwitchFragment.class.getSimpleName(), from)) {
-            ((ISupportActivity) get_mActivity()).getSupportDelegate().showHideFragment(
-                    SupportHelper.findFragment(getFragmentManager(), MainSwitchFragment.class), this);
+//            ((ISupportActivity) get_mActivity()).getSupportDelegate().showHideFragment(
+//                    SupportHelper.findFragment(getFragmentManager(), MainSwitchFragment.class), this);
+            getSupportDelegate().pop();
         } else {
             getSupportDelegate().pop();
         }
@@ -291,7 +292,14 @@ public class SearchFragment extends ZhiliaoFragment {
         }
         mSearchAdapter = new SearchAdapter(R.layout.item_music, new ArrayList<>());
         mSearchAdapter.setOnItemClickListener((adapter, view1, position) -> {
-            MusicManager.getInstance().playMusicByEntity(mMusicEntities.get(position));
+            String musicId = mSearchAdapter.getItem(position).getId();
+            String musicName = mSearchAdapter.getItem(position).getName();
+            if (!TextUtils.isEmpty(musicId) &&
+                    !musicId.equals(MusicManager.getInstance().getNowPlayingSongId())) {
+                MusicManager.getInstance().playMusicByEntity(mMusicEntities.get(position));
+            } else if (!TextUtils.isEmpty(musicName)) {
+                Logger.d(musicName + "is already playing");
+            }
         });
         mSearchAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
             @Override
@@ -435,7 +443,10 @@ public class SearchFragment extends ZhiliaoFragment {
             @Override
             public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
                 if (queueDialog != null) {
-                    queueDialog.setNewData(MusicManager.getInstance().getPlayList());
+                    queueDialog.onQueueChanged(queue);
+                }
+                if (MusicManager.getInstance().getPlayList().size() <= 0) {
+                    showStopped();
                 }
             }
 
@@ -463,7 +474,7 @@ public class SearchFragment extends ZhiliaoFragment {
 
             @Override
             public void onPlayerStop() {
-                showStopped();
+                showPaused();
             }
 
             @Override
@@ -555,6 +566,7 @@ public class SearchFragment extends ZhiliaoFragment {
     private void showStopped() {
         showPaused();
         song_description.setText("知了音乐 让生活充满音乐");
+        Glide.with(getActivity()).clear(song_cover);
         song_cover.setRotation(0f);
         song_cover.setImageDrawable(getActivity().getDrawable(R.drawable.diskte));
     }

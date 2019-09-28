@@ -7,5 +7,6 @@
     <color name="progress_end">#80ffffff</color>
     <color name="dialog_more_background">#171919</color>
     <color name="button_red">#F23E56</color>
+    <color name="app_green">#05b962</color>
 
 </resources>

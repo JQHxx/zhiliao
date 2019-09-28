@@ -49,7 +49,8 @@ public class MainActivity extends ZhiliaoActivity {
         //ButterKnife
         ButterKnife.bind(this);
         MediaSessionConnection.getInstance().connect();
-
+//        切换主题
+//        setTheme(R.style.AppTheme_Elegant_White);
     }
 
     @Override

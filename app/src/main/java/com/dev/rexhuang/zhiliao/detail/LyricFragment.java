@@ -12,7 +12,7 @@ import androidx.fragment.app.Fragment;
 import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.event.MessageEvent;
 import com.dev.rexhuang.zhiliao.music_hall.MusicHallFragment;
-import com.dev.rexhuang.zhiliao_core.api.ZhiliaoApi;
+import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
 import com.dev.rexhuang.zhiliao_core.base.BaseActivity;
 import com.dev.rexhuang.zhiliao_core.entity.LyricEntity;
 import com.dev.rexhuang.zhiliao_core.net.callback.ISuccess;
@@ -114,6 +114,9 @@ public class LyricFragment extends Fragment {
     @Override
     public void onDestroyView() {
         EventBus.getDefault().unregister(this);
+        if (mUnbinder != null) {
+            mUnbinder.unbind();
+        }
         super.onDestroyView();
     }
 

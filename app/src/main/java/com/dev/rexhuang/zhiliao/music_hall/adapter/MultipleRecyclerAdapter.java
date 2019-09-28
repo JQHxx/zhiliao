@@ -9,7 +9,7 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.music_hall.MusicHallFragment;
-import com.dev.rexhuang.zhiliao_core.api.ZhiliaoApi;
+import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
 import com.dev.rexhuang.zhiliao_core.entity.SongListEntity;
 import com.dev.rexhuang.zhiliao.music_hall.banner.BannerAdapter;
 import com.wenjian.loopbanner.LoopBanner;
@@ -89,7 +89,7 @@ public class MultipleRecyclerAdapter extends BaseMultiItemQuickAdapter<MultipleI
                         @Override
                         public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                             try {
-                                ZhiliaoApi.musicbill(MusicHallFragment.TOKEN,dataEntities.get(position).getId(),null,null,null,null);
+                                ZhiliaoApi.musicbill(MusicHallFragment.TOKEN, dataEntities.get(position).getId(), null, null, null, null);
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
@@ -97,12 +97,13 @@ public class MultipleRecyclerAdapter extends BaseMultiItemQuickAdapter<MultipleI
                     });
                     songList.setAdapter(songListAdapter);
                     songListAdapter.bindToRecyclerView(songList);
-                }else {
-                    ((SongListAdapter)songList.getAdapter()).setNewData(item.getField(MultipleItemType.SONGLIST));
+                } else {
+                    ((SongListAdapter) songList.getAdapter()).setNewData(item.getField(MultipleItemType.SONGLIST));
                 }
                 break;
             default:
                 break;
         }
+        helper.addOnClickListener(R.id.layout_singer);
     }
 }

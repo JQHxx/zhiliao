@@ -5,4 +5,6 @@ package com.dev.rexhuang.zhiliao_core.base;
  * *  on 2019/7/26
  */
 public abstract class PermissionCheckActivity extends BaseActivity {
+    public void checkPermission() {
+    }
 }

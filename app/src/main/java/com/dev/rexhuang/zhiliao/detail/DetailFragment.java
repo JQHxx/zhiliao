@@ -297,7 +297,10 @@ public class DetailFragment extends ZhiliaoFragment {
             @Override
             public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
                 if (queueDialog != null) {
-                    queueDialog.setNewData(MusicManager.getInstance().getPlayList());
+                    queueDialog.onQueueChanged(queue);
+                }
+                if (MusicManager.getInstance().getPlayList().size() <= 0) {
+                    showStopped();
                 }
             }
 
@@ -326,7 +329,7 @@ public class DetailFragment extends ZhiliaoFragment {
 
             @Override
             public void onPlayerStop() {
-                showStopped();
+                showPaused();
                 mTimeTaskManager.stopToUpdateProgress();
             }
 
@@ -534,19 +537,27 @@ public class DetailFragment extends ZhiliaoFragment {
     }
 
     private void playAnimation() {
-        coverFragment.playAnimation();
+        if (coverFragment != null) {
+            coverFragment.playAnimation();
+        }
     }
 
     private void pauseAnimation() {
-        coverFragment.pauseAnimation();
+        if (coverFragment != null) {
+            coverFragment.pauseAnimation();
+        }
     }
 
     private void stopAnimation() {
-        coverFragment.stopAnimation();
+        if (coverFragment != null) {
+            coverFragment.stopAnimation();
+        }
     }
 
     private void resetAnimation() {
-        coverFragment.resetAnimation();
+        if (coverFragment != null) {
+            coverFragment.resetAnimation();
+        }
     }
 
     private DetailHandler handler = new DetailHandler(this);

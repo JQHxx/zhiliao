@@ -2,7 +2,9 @@ package com.dev.rexhuang.zhiliao;
 
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.View;
 import android.view.Window;
@@ -22,6 +24,7 @@ import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -99,8 +102,14 @@ public class QueueDialog extends BottomSheetDialog {
         mQueueAdapter.setOnItemClickListener(new BaseQuickAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                MusicManager.getInstance().playMusicByIndex(position);
-
+                String musicId = mQueueAdapter.getItem(position).getId();
+                String musicName = mQueueAdapter.getItem(position).getName();
+                if (!TextUtils.isEmpty(musicId) &&
+                        !musicId.equals(MusicManager.getInstance().getNowPlayingSongId())) {
+                    MusicManager.getInstance().playMusicByIndex(position);
+                } else if (!TextUtils.isEmpty(musicName)) {
+                    Logger.d(musicName + "is already playing");
+                }
             }
         });
         mQueueAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
@@ -209,6 +218,13 @@ public class QueueDialog extends BottomSheetDialog {
                 tv_play_mode.setText(play_mode_text[2]);
                 iv_play_mode.setImageDrawable(play_mode_drawable[2]);
                 break;
+        }
+    }
+
+    public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
+        setNewData(MusicManager.getInstance().getPlayList());
+        if (MusicManager.getInstance().getPlayList().size() <= 0) {
+            hide();
         }
     }
 

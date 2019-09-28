@@ -90,7 +90,9 @@ public abstract class BaseFragment extends Fragment implements ISupportFragment 
     public void onDestroyView() {
         mDelegate.onDestroyView();
         super.onDestroyView();
-        mUnbinder.unbind();
+        if (mUnbinder != null) {
+            mUnbinder.unbind();
+        }
     }
 
     @Override
@@ -117,7 +119,6 @@ public abstract class BaseFragment extends Fragment implements ISupportFragment 
         }
         return view;
     }
-
 
 
     @Override
@@ -206,7 +207,6 @@ public abstract class BaseFragment extends Fragment implements ISupportFragment 
     public void putNewBundle(Bundle newBundle) {
         mDelegate.putNewBundle(newBundle);
     }
-
 
 
     public FragmentActivity get_mActivity() {

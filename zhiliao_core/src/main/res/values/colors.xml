@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!--Theme.Cool.Black-->
     <color name="toolbar">#0E1326</color>
     <color name="toolbar_search">#1E2337</color>
     <color name="switch_selected">#27FDB9</color>
@@ -23,4 +24,6 @@
     <color name="queue_dialog">#1C222C</color>
     <color name="hint_color">#868993</color>
     <color name="login_backgroud">#3d3d3d</color>
+
+    <!--Theme.Elegant.White-->
 </resources>

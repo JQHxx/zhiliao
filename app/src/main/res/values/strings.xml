@@ -26,4 +26,7 @@
         <item>单曲循环</item>
         <item>列表循环</item>
     </string-array>
+
+    <string name="permission_hint">软件必须获取相关权限</string>
+    <string name="sure">确定</string>
 </resources>

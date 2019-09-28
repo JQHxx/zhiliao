@@ -1,7 +1,8 @@
-package com.dev.rexhuang.zhiliao_core.api;
+package com.dev.rexhuang.zhiliao_core.api.zhiliao;
 
 import android.widget.Toast;
 
+import com.dev.rexhuang.zhiliao_core.api.BaseApi;
 import com.dev.rexhuang.zhiliao_core.config.ConfigKeys;
 import com.dev.rexhuang.zhiliao_core.config.Zhiliao;
 import com.dev.rexhuang.zhiliao_core.net.RestClient;
@@ -24,42 +25,7 @@ import okhttp3.RequestBody;
  * *  created by RexHuang
  * *  on 2019/8/30
  */
-public class ZhiliaoApi {
-    //field
-    private static IError iError = new IError() {
-        @Override
-        public void onError(int code, String message) {
-            Toast.makeText(Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name()),
-                    "网络请求错误: 错误码 : " + code + " 错误信息 : " + message, Toast.LENGTH_LONG).show();
-        }
-    };
-
-    private static IRequest iRequest = new IRequest() {
-        @Override
-        public void onRequestStart() {
-
-        }
-
-        @Override
-        public void onRequestEnd() {
-
-        }
-    };
-
-    private static ISuccess<String> iSuccess = new ISuccess<String>() {
-        @Override
-        public void onSuccess(String response) {
-            Toast.makeText(Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name()), response, Toast.LENGTH_SHORT).show();
-        }
-    };
-
-    private static IFailure iFailure = new IFailure() {
-        @Override
-        public void onFailure() {
-            Toast.makeText(Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name()),
-                    "网络请求失败,请检查网络是否可用!", Toast.LENGTH_LONG).show();
-        }
-    };
+public class ZhiliaoApi extends BaseApi {
 
     private static final String AUTHORIZATION = "Authorization";
     private static final String CONTENTTYPE = "Content-Type";
