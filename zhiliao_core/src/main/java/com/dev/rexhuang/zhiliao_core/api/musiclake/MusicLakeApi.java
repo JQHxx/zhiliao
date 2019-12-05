@@ -28,7 +28,7 @@ public class MusicLakeApi extends BaseApi {
     private static final NeteaseRestService neteaseRestService = RestCreator.getNeteaseRestService();
 
     public static void getBanner(IRequest request, ISuccess success, IFailure failure, IError error) {
-        String url = "http://musiclake.leanapp.cn/banner";
+        String url = "http://music.rexhuang.top/banner";
         Observable observable = neteaseRestService.getBanner(url);
         observable.subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())

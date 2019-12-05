@@ -19,15 +19,11 @@ import me.yokeyword.fragmentation.anim.FragmentAnimator;
  */
 public abstract class BaseActivity extends AppCompatActivity implements ISupportActivity {
 
-
     private static final String TAG = BaseActivity.class.getSimpleName();
 
-    public static final String EXTRA_CURRENT_MEDIA_DESCRIPTION =
-            "com.dev.rexhuang.zhiliao.CURRENT_MEDIA_DESCRIPTION";
-    public static final String EXTRA_CURRENT_MEDIA_ROTATION =
-            "com.dev.rexhuang.zhiliao.CURRENT_MEDIA_ROTATION";
-    public static final String FRGMENT_FROM =
-            "com.dev.rexhuang.zhiliao.FRGMENT_FROM";
+    public static final String EXTRA_CURRENT_MEDIA_DESCRIPTION = "com.dev.rexhuang.zhiliao.CURRENT_MEDIA_DESCRIPTION";
+    public static final String EXTRA_CURRENT_MEDIA_ROTATION = "com.dev.rexhuang.zhiliao.CURRENT_MEDIA_ROTATION";
+    public static final String FRGMENT_FROM = "com.dev.rexhuang.zhiliao.FRGMENT_FROM";
     public static final String MUSIC_SESSION_ACTION = "com.dev.rexhuang.zhiliao.musicservice.pendingintent";
 
     private final SupportActivityDelegate mDelegate = new SupportActivityDelegate(this);

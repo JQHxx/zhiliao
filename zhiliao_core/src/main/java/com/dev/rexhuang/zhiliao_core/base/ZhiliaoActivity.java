@@ -16,7 +16,7 @@ import com.dev.rexhuang.zhiliao_core.statusbar.StatusBarUtil;
  */
 public abstract class ZhiliaoActivity extends PermissionCheckActivity {
 
-    public abstract void loadContainerFragment(ZhiliaoFragment zhiliaoSwitchFragment);
+    public abstract void loadContainerFragment(ZhiliaoFragment zhiliaoFragment);
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
