@@ -41,6 +41,7 @@ import com.dev.rexhuang.zhiliao.QueueDialog;
 import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.timer.TimeHelper;
 import com.dev.rexhuang.zhiliao.timer.TimerTaskManager;
+import com.dev.rexhuang.zhiliao.util.BitmapUtils;
 import com.dev.rexhuang.zhiliao_core.base.BaseActivity;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoFragment;
 import com.dev.rexhuang.zhiliao_core.config.ConfigKeys;
@@ -453,32 +454,7 @@ public class DetailFragment extends ZhiliaoFragment {
         td.startTransition(1000);
     }
 
-    /**
-     * @param inSampleSize 图片像素的 1/n*n
-     */
-    private static Drawable createBlurredImageFromBitmap(Bitmap bitmap, int inSampleSize) {
 
-        RenderScript rs = RenderScript.create(Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name()));
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inSampleSize = inSampleSize;
-
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 30, stream);
-        byte[] imageInByte = stream.toByteArray();
-        ByteArrayInputStream bis = new ByteArrayInputStream(imageInByte);
-        Bitmap blurTemplate = BitmapFactory.decodeStream(bis, null, options);
-
-        final Allocation input = Allocation.createFromBitmap(rs, blurTemplate);
-        final Allocation output = Allocation.createTyped(rs, input.getType());
-        final ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));
-        script.setRadius(24f);
-        script.setInput(input);
-        script.forEach(output);
-        output.copyTo(blurTemplate);
-        rs.destroy();
-
-        return new BitmapDrawable(((Context) Zhiliao.getConfig(ConfigKeys.APPLICATION_CONTEXT.name())).getResources(), blurTemplate);
-    }
 
     private void getCoverBitmap() {
         new Thread(() -> {
@@ -594,7 +570,7 @@ public class DetailFragment extends ZhiliaoFragment {
         public void run() {
             currentMusicEntity.setCoverBitmap(resource);
             coverFragment.setCoverBitmap(resource);
-            Drawable blur = createBlurredImageFromBitmap(resource, 12);
+            Drawable blur = BitmapUtils.createBlurredImageFromBitmap(resource, 12);
             iv_bg_detail.setImageDrawable(blur);
         }
     }

@@ -2,22 +2,59 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/playlist_coordinatorLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:background="@color/toolbar">
 
     <com.google.android.material.appbar.AppBarLayout
+        android:id="@+id/playlist_appBarLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:layout_height="wrap_content">
 
         <com.google.android.material.appbar.CollapsingToolbarLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:background="@color/toolbar"
+            app:contentScrim="@color/toolbar"
+            app:layout_scrollFlags="scroll|exitUntilCollapsed|snap">
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/playlist_cl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="?attr/actionBarSize"
+                android:visibility="gone"
+                app:layout_collapseMode="parallax">
+
+                <ImageView
+                    android:id="@+id/iv_playlist_cover"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:scaleType="fitCenter"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:background="@drawable/cover_00003" />
+
+                <TextView
+                    android:id="@+id/tv_playlist_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="30dp"
+                    android:layout_marginTop="@dimen/dp_10"
+                    android:text="粤语"
+                    android:visibility="gone"
+                    app:layout_constraintStart_toEndOf="@+id/iv_playlist_cover"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:ignore="HardcodedText"
+                    tools:text="粤语" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <androidx.appcompat.widget.Toolbar
                 android:layout_width="match_parent"
-                android:layout_height="@dimen/dp_56">
+                android:layout_height="?attr/actionBarSize"
+                app:layout_collapseMode="pin">
 
                 <RelativeLayout
                     android:layout_width="match_parent"
@@ -34,46 +71,39 @@
                         android:id="@+id/tv_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_alignParentTop="true"
-                        android:layout_marginStart="@dimen/dp_10"
-                        android:layout_marginTop="@dimen/dp_10"
-                        android:layout_toEndOf="@+id/iv_back"
+                        android:layout_centerInParent="true"
                         android:text="歌单"
                         android:textColor="@color/white"
                         android:textSize="@dimen/sp_18"
                         tools:ignore="HardcodedText" />
+
                 </RelativeLayout>
             </androidx.appcompat.widget.Toolbar>
 
-            <!--<androidx.constraintlayout.widget.ConstraintLayout-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="wrap_content"-->
-                <!--android:layout_marginTop="@dimen/dp_56">-->
-
-                <!--<ImageView-->
-                    <!--android:id="@+id/iv_playlist_cover"-->
-                    <!--android:layout_width="@dimen/dp_80"-->
-                    <!--android:layout_height="@dimen/dp_80"-->
-                    <!--android:layout_margin="@dimen/dp_5"-->
-                    <!--app:layout_constraintBottom_toBottomOf="parent"-->
-                    <!--app:layout_constraintEnd_toEndOf="parent"-->
-                    <!--app:layout_constraintStart_toStartOf="parent"-->
-                    <!--app:layout_constraintTop_toTopOf="parent"-->
-                    <!--tools:background="@drawable/cover_00003" />-->
-
-                <!--<TextView-->
-                    <!--android:id="@+id/tv_playlist_name"-->
-                    <!--android:layout_width="wrap_content"-->
-                    <!--android:layout_height="wrap_content"-->
-                    <!--android:layout_marginStart="@dimen/dp_5"-->
-                    <!--app:layout_constraintStart_toEndOf="@+id/iv_playlist_cover"-->
-                    <!--app:layout_constraintTop_toTopOf="parent"-->
-                    <!--tools:text="粤语" />-->
-
-            <!--</androidx.constraintlayout.widget.ConstraintLayout>-->
 
         </com.google.android.material.appbar.CollapsingToolbarLayout>
 
     </com.google.android.material.appbar.AppBarLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <TextView
+            android:id="@+id/tv_play_all"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="播放全部"
+            android:visibility="gone"
+            tools:ignore="HardcodedText" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/playlist_rv"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:overScrollMode="never" />
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

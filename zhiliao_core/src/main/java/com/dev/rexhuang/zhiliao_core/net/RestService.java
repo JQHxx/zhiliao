@@ -1,6 +1,7 @@
 package com.dev.rexhuang.zhiliao_core.net;
 
 import com.dev.rexhuang.zhiliao_core.entity.LyricEntity;
+import com.dev.rexhuang.zhiliao_core.entity.SongListDetailEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongSearchEntity;
 import com.dev.rexhuang.zhiliao_core.entity.User;
@@ -83,7 +84,7 @@ public interface RestService {
     Call<SongListEntity> musicbillList(@Url String url, @HeaderMap Map<String, String> headers);
 
     @GET
-    Call<String> musicbill(@Url String url, @HeaderMap Map<String, String> headers);
+    Call<SongListDetailEntity> musicbill(@Url String url, @HeaderMap Map<String, String> headers);
 
     @POST
     Call<String> createMusicbill(@Url String url, @HeaderMap Map<String, String> headers, @Body RequestBody body);

@@ -1,6 +1,7 @@
 package com.dev.rexhuang.zhiliao.music_hall.adapter;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.View;
 import android.widget.LinearLayout;
 
@@ -9,9 +10,12 @@ import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.BaseViewHolder;
 import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.music_hall.MusicHallFragment;
+import com.dev.rexhuang.zhiliao.music_hall.PlayListActivity;
 import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
+import com.dev.rexhuang.zhiliao_core.entity.SongListDetailEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListEntity;
 import com.dev.rexhuang.zhiliao.music_hall.banner.BannerAdapter;
+import com.dev.rexhuang.zhiliao_core.net.callback.ISuccess;
 import com.wenjian.loopbanner.LoopBanner;
 
 import java.util.List;
@@ -88,11 +92,12 @@ public class MultipleRecyclerAdapter extends BaseMultiItemQuickAdapter<MultipleI
                     songListAdapter.setOnItemClickListener(new OnItemClickListener() {
                         @Override
                         public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
-                            try {
-                                ZhiliaoApi.musicbill(MusicHallFragment.TOKEN, dataEntities.get(position).getId(), null, null, null, null);
-                            } catch (JSONException e) {
-                                e.printStackTrace();
-                            }
+                            SongListEntity.DataEntity dataEntity = dataEntities.get(position);
+                           Intent intent = new Intent(mContext,PlayListActivity.class);
+                           intent.putExtra("PlayList_ID",dataEntity.getId());
+                           intent.putExtra("PlayList_COVER",position);
+                           intent.putExtra("PlayList_NAME",dataEntity.getName());
+                           mContext.startActivity(intent);
                         }
                     });
                     songList.setAdapter(songListAdapter);
