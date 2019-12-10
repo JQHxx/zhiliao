@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.Toolbar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
@@ -21,6 +22,7 @@ import com.dev.rexhuang.zhiliao_core.base.ZhiliaoFragment;
 import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListDetailEntity;
 import com.dev.rexhuang.zhiliao_core.net.callback.ISuccess;
+import com.gyf.immersionbar.ImmersionBar;
 
 import org.json.JSONException;
 
@@ -35,6 +37,9 @@ import butterknife.ButterKnife;
  * *  on 2019/12/5
  */
 public class PlayListActivity extends ZhiliaoActivity {
+
+    @BindView(R.id.playlist_toolbar)
+    Toolbar playlist_toolbar;
 
     @BindView(R.id.playlist_rv)
     RecyclerView playlist_rv;
@@ -81,6 +86,9 @@ public class PlayListActivity extends ZhiliaoActivity {
         String playList_NAME = getIntent().getStringExtra("PlayList_NAME");
         int coverPosition = getIntent().getIntExtra("PlayList_COVER", 1);
         Bitmap coverBitmap = BitmapFactory.decodeResource(getResources(), drawables[coverPosition]);
+        ImmersionBar.with(this)
+                .titleBar(playlist_toolbar)
+                .init();
         iv_playlist_cover.setImageBitmap(coverBitmap);
 //        Drawable blur = BitmapUtils.createBlurredImageFromBitmap(coverBitmap, 12);
         playlist_cl.setBackground(getDrawable(drawables[coverPosition]));

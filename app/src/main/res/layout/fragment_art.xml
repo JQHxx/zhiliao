@@ -70,10 +70,9 @@
             </LinearLayout>
 
             <androidx.appcompat.widget.Toolbar
-                android:id="@+id/toolbar"
+                android:id="@+id/artistlist_toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:paddingTop="10dp"
                 app:layout_collapseMode="pin">
 
                 <RelativeLayout

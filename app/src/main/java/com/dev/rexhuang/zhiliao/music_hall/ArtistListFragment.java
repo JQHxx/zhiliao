@@ -4,6 +4,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
@@ -19,6 +20,7 @@ import com.dev.rexhuang.zhiliao_core.base.ZhiliaoFragment;
 import com.dev.rexhuang.zhiliao_core.entity.Artist;
 import com.dev.rexhuang.zhiliao_core.entity.ArtistsDataInfo;
 import com.dev.rexhuang.zhiliao_core.net.callback.ISuccess;
+import com.gyf.immersionbar.ImmersionBar;
 import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
@@ -40,6 +42,8 @@ public class ArtistListFragment extends ZhiliaoFragment {
     private ArtistCateAdapter genreCateAdapter;
     private ArtistCateAdapter indexCateAdapter;
     private ArtistListAdapter artistListAdapter;
+    @BindView(R.id.artistlist_toolbar)
+    Toolbar artistlist_toolbar;
     @BindView(R.id.rcy_area)
     RecyclerView rcy_area;
     @BindView(R.id.rcy_genre)
@@ -52,8 +56,6 @@ public class ArtistListFragment extends ZhiliaoFragment {
     RecyclerView rcy_result;
     @BindView(R.id.titleTv)
     TextView titleTv;
-    @BindView(R.id.toolbar)
-    public Toolbar mToolbar;
 
     @Override
     public Object setLayout() {
@@ -66,18 +68,20 @@ public class ArtistListFragment extends ZhiliaoFragment {
     }
 
     @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        initToolBar();
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ImmersionBar.setTitleBar(getActivity(), artistlist_toolbar);
     }
 
-    private void initToolBar() {
-        if (getActivity() != null && mToolbar != null) {
-            mToolbar.setTitle("歌手列表");
-//            AppCompatActivity appCompatActivity = (AppCompatActivity) getActivity();
-//            appCompatActivity.setSupportActionBar(mToolbar);
-//            appCompatActivity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-        }
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+    }
+
+    @Override
+    public void onSupportVisible() {
+        super.onSupportVisible();
+        ImmersionBar.with(this).keyboardEnable(true).init();
     }
 
     private void showArtistList(List<Artist> artists) {

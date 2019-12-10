@@ -13,8 +13,11 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
+import androidx.appcompat.widget.Toolbar;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
@@ -31,6 +34,7 @@ import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 import com.dev.rexhuang.zhiliao_core.player2.manager.OnPlayerEventListener;
 import com.dev.rexhuang.zhiliao_core.player2.model.MusicProvider;
 import com.dev.rexhuang.zhiliao_core.utils.AnimHelper;
+import com.gyf.immersionbar.ImmersionBar;
 import com.mikepenz.iconics.view.IconicsTextView;
 import com.orhanobut.logger.Logger;
 
@@ -71,6 +75,9 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
     private OnPlayerEventListener onPlayerEventListener;
     private SwitchHandler handler = new SwitchHandler(this);
     private static final int UPDATE_QUEUE = 102000000;
+
+    @BindView(R.id.toolbar)
+    Toolbar toolbar;
 
     @BindView(R.id.search_bar)
     LinearLayout search_bar;
@@ -291,6 +298,18 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
             }
         };
         MusicManager.getInstance().addPlayerEventListener(onPlayerEventListener);
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ImmersionBar.setTitleBar(getActivity(), toolbar);
+    }
+
+    @Override
+    public void onSupportVisible() {
+        super.onSupportVisible();
+        ImmersionBar.with(this).keyboardEnable(true).init();
     }
 
     @Override

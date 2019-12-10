@@ -7,6 +7,7 @@ import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao_core.base.BaseActivity;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoActivity;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoFragment;
+import com.gyf.immersionbar.ImmersionBar;
 
 public class DetailActivity extends ZhiliaoActivity {
 
@@ -21,6 +22,7 @@ public class DetailActivity extends ZhiliaoActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+        ImmersionBar.with(this).init();
         initDetailFragment();
         loadContainerFragment(detailFragment);
     }

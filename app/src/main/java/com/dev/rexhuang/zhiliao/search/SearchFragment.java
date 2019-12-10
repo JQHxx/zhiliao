@@ -15,10 +15,13 @@ import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
@@ -54,6 +57,7 @@ import com.dev.rexhuang.zhiliao_core.utils.AnimHelper;
 import com.dev.rexhuang.zhiliao_core.utils.Utils;
 import com.dyhdyh.widget.loadingbar2.LoadingBar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.gyf.immersionbar.ImmersionBar;
 import com.library.flowlayout.FlowLayoutManager;
 import com.library.flowlayout.SpaceItemDecoration;
 import com.mikepenz.iconics.view.IconicsTextView;
@@ -126,6 +130,9 @@ public class SearchFragment extends ZhiliaoFragment {
     private SongSearchEntity mSongSearchEntity;
     private List<MusicEntity> mMusicEntities;
     private OnPlayerEventListener onPlayerEventListener;
+
+    @BindView(R.id.searchbar)
+    LinearLayout searchbar;
 
     @BindView(R.id.rl_loading)
     RelativeLayout rl_loading;
@@ -550,11 +557,21 @@ public class SearchFragment extends ZhiliaoFragment {
         });
     }
 
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        ImmersionBar.setTitleBar(getActivity(),searchbar);
+    }
 
     @Override
     public void onStart() {
         super.onStart();
+    }
 
+    @Override
+    public void onSupportVisible() {
+        super.onSupportVisible();
+        ImmersionBar.with(this).keyboardEnable(true).init();
     }
 
     @Override
