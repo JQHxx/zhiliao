@@ -7,6 +7,12 @@
     android:layout_height="match_parent"
     android:background="@color/toolbar">
 
+    <RelativeLayout
+        android:id="@+id/rl_loading"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/playlist_appBarLayout"
         android:layout_width="match_parent"
@@ -72,8 +78,12 @@
                         android:id="@+id/tv_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
+                        android:layout_toRightOf="@+id/iv_back"
                         android:layout_centerInParent="true"
                         android:text="歌单"
+                        android:layout_marginLeft="@dimen/dp_10"
+                        android:singleLine="true"
+                        android:ellipsize="marquee"
                         android:textColor="@color/white"
                         android:textSize="@dimen/sp_18"
                         tools:ignore="HardcodedText" />

@@ -1,11 +1,14 @@
 package com.dev.rexhuang.zhiliao_core.api.musiclake;
 
+import android.util.Log;
 import android.widget.Toast;
 
 import com.dev.rexhuang.zhiliao_core.api.BaseApi;
 import com.dev.rexhuang.zhiliao_core.config.ConfigKeys;
 import com.dev.rexhuang.zhiliao_core.config.Zhiliao;
 import com.dev.rexhuang.zhiliao_core.entity.BannerEntity;
+import com.dev.rexhuang.zhiliao_core.entity.NeteaseMusicSongListDetailEntity;
+import com.dev.rexhuang.zhiliao_core.entity.RecommendSongListEntity;
 import com.dev.rexhuang.zhiliao_core.net.NeteaseRestService;
 import com.dev.rexhuang.zhiliao_core.net.RestCreator;
 import com.dev.rexhuang.zhiliao_core.net.callback.IError;
@@ -53,6 +56,75 @@ public class MusicLakeApi extends BaseApi {
                     @Override
                     public void onComplete() {
                         Logger.d("onComplete");
+                    }
+                });
+    }
+
+    public static void getRecommendSongList(IRequest request, ISuccess success, IFailure failure, IError error) {
+        String url = "http://music.rexhuang.top/personalized?limit=10";
+        Observable observable = neteaseRestService.getRecommendSongList(url);
+        observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<RecommendSongListEntity>() {
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+
+                    }
+
+                    @Override
+                    public void onNext(RecommendSongListEntity recommendSongListEntity) {
+                        if (success != null) {
+                            Log.e("getRecommendSongList", "success != null");
+                            success.onSuccess(recommendSongListEntity);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        e.getMessage();
+                        Log.e("getRecommendSongList", "onError");
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.e("getRecommendSongList", "onComplete");
+                    }
+                });
+    }
+
+    public static void getSongListDetail(String songListID, IRequest request, ISuccess success, IFailure failure, IError error) {
+        String url = "http://music.rexhuang.top/playlist/detail?id=" + songListID;
+        Observable observable = neteaseRestService.getSongListDetail(url);
+        observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<NeteaseMusicSongListDetailEntity>() {
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        request.onRequestStart();
+                    }
+
+                    @Override
+                    public void onNext(NeteaseMusicSongListDetailEntity neteaseMusicSongListDetailEntity) {
+                        if (success != null) {
+                            Log.e("getSongListDetail", "success != null");
+                            success.onSuccess(neteaseMusicSongListDetailEntity);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        e.getMessage();
+                        Log.e("getSongListDetail", "onError");
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.e("getSongListDetail", "onComplete");
+                        request.onRequestEnd();
                     }
                 });
     }

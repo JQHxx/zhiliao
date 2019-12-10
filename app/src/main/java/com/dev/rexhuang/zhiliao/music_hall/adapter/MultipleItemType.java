@@ -10,5 +10,6 @@ public enum MultipleItemType {
     AGE,
     TEXT,
     SONGLIST,
-    ITEM_TYPE
+    RECOMMONSONGLIST,
+    ITEM_TYPE,
 }

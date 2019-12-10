@@ -1,6 +1,9 @@
 package com.dev.rexhuang.zhiliao_core.net;
 
+import com.dev.rexhuang.zhiliao_core.R;
 import com.dev.rexhuang.zhiliao_core.entity.BannerEntity;
+import com.dev.rexhuang.zhiliao_core.entity.NeteaseMusicSongListDetailEntity;
+import com.dev.rexhuang.zhiliao_core.entity.RecommendSongListEntity;
 
 import io.reactivex.Observable;
 import retrofit2.http.GET;
@@ -13,4 +16,10 @@ import retrofit2.http.Url;
 public interface NeteaseRestService {
     @GET
     Observable<BannerEntity> getBanner(@Url String url);
+
+    @GET
+    Observable<RecommendSongListEntity> getRecommendSongList(@Url String url);
+
+    @GET
+    Observable<NeteaseMusicSongListDetailEntity> getSongListDetail(@Url String url);
 }

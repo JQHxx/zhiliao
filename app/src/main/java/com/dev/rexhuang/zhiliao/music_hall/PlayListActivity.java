@@ -3,9 +3,11 @@ package com.dev.rexhuang.zhiliao.music_hall;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -15,13 +17,18 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.dev.rexhuang.zhiliao.R;
+import com.dev.rexhuang.zhiliao.music_hall.adapter.NeteasePlayListDetailAdapter;
 import com.dev.rexhuang.zhiliao.music_hall.adapter.PlayListDetailAdapter;
+import com.dev.rexhuang.zhiliao_core.api.musiclake.MusicLakeApi;
 import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoActivity;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoFragment;
 import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
+import com.dev.rexhuang.zhiliao_core.entity.NeteaseMusicSongListDetailEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListDetailEntity;
+import com.dev.rexhuang.zhiliao_core.net.callback.IRequest;
 import com.dev.rexhuang.zhiliao_core.net.callback.ISuccess;
+import com.dyhdyh.widget.loadingbar2.LoadingBar;
 import com.gyf.immersionbar.ImmersionBar;
 
 import org.json.JSONException;
@@ -38,8 +45,13 @@ import butterknife.ButterKnife;
  */
 public class PlayListActivity extends ZhiliaoActivity {
 
+    private static final String NETEASEMUSICAPI = "NeteaseMusicApi";
+    private static final String ZHILIAOAPI = "ZhiliaoApi";
     @BindView(R.id.playlist_toolbar)
     Toolbar playlist_toolbar;
+
+    @BindView(R.id.rl_loading)
+    RelativeLayout rl_loading;
 
     @BindView(R.id.playlist_rv)
     RecyclerView playlist_rv;
@@ -58,6 +70,29 @@ public class PlayListActivity extends ZhiliaoActivity {
 
     private View headerView;
     private PlayListDetailAdapter playlistDetailAdapter;
+    private NeteasePlayListDetailAdapter neteasePlayListDetailAdapter;
+
+    private IRequest request = new IRequest() {
+        @Override
+        public void onRequestStart() {
+            if (rl_loading != null) {
+                rl_loading.setVisibility(View.VISIBLE);
+                Log.d("rl_loading","show");
+                LoadingBar.view(rl_loading)
+                        .setFactoryFromResource(R.layout.loading_view)
+                        .show();
+            }
+        }
+
+        @Override
+        public void onRequestEnd() {
+            if (rl_loading != null) {
+                Log.d("rl_loading","disappear");
+                rl_loading.setVisibility(View.GONE);
+                LoadingBar.view(rl_loading).cancel();
+            }
+        }
+    };
 
     private int[] drawables = new int[]{R.drawable.cover_00001, R.drawable.cover_00002, R.drawable.cover_00003,
             R.drawable.cover_00004, R.drawable.cover_00005, R.drawable.cover_00006,
@@ -82,6 +117,8 @@ public class PlayListActivity extends ZhiliaoActivity {
         setContentView(R.layout.activity_playlist);
         headerView = LayoutInflater.from(this).inflate(R.layout.item_search_header, null);
         ButterKnife.bind(this);
+        String from = getIntent().getStringExtra("From");
+
         String playList_ID = getIntent().getStringExtra("PlayList_ID");
         String playList_NAME = getIntent().getStringExtra("PlayList_NAME");
         int coverPosition = getIntent().getIntExtra("PlayList_COVER", 1);
@@ -95,23 +132,41 @@ public class PlayListActivity extends ZhiliaoActivity {
         tv_title.setText(playList_NAME);
         tv_playlist_name.setText(playList_NAME);
         playlist_rv.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
-        playlistDetailAdapter = new PlayListDetailAdapter(R.layout.item_music_zhiliao, new ArrayList<>());
-        playlist_rv.setAdapter(playlistDetailAdapter);
-        try {
-            ZhiliaoApi.musicbill(MusicHallFragment.TOKEN, playList_ID, null, new ISuccess<SongListDetailEntity>() {
+        if (NETEASEMUSICAPI.equals(from)) {
+            neteasePlayListDetailAdapter = new NeteasePlayListDetailAdapter(R.layout.item_music_zhiliao, new ArrayList<>());
+            playlist_rv.setAdapter(neteasePlayListDetailAdapter);
+            MusicLakeApi.getSongListDetail(playList_ID, request, new ISuccess<NeteaseMusicSongListDetailEntity>() {
                 @Override
-                public void onSuccess(SongListDetailEntity response) {
-                    if (response != null && response.getCode() == 0) {
-                        List<MusicEntity> musicEntities = response.getDataEntity().getMusic_list();
-                        if (musicEntities != null && musicEntities.size() > 0) {
-                            playlistDetailAdapter.setNewData(response.getDataEntity().getMusic_list());
-                            playlistDetailAdapter.addHeaderView(headerView);
+                public void onSuccess(NeteaseMusicSongListDetailEntity response) {
+                    if (response != null && response.getCode() == 200) {
+                        List<NeteaseMusicSongListDetailEntity.PlaylistEntity.TracksEntity> trackIdsEntities = response.getPlaylist().getTracks();
+                        if (trackIdsEntities != null && trackIdsEntities.size() > 0) {
+                            neteasePlayListDetailAdapter.setNewData(trackIdsEntities);
+                            neteasePlayListDetailAdapter.addHeaderView(headerView);
                         }
                     }
                 }
             }, null, null);
-        } catch (JSONException e) {
-            e.printStackTrace();
+
+        } else if (ZHILIAOAPI.equals(from)) {
+            playlistDetailAdapter = new PlayListDetailAdapter(R.layout.item_music_zhiliao, new ArrayList<>());
+            playlist_rv.setAdapter(playlistDetailAdapter);
+            try {
+                ZhiliaoApi.musicbill(MusicHallFragment.TOKEN, playList_ID, request, new ISuccess<SongListDetailEntity>() {
+                    @Override
+                    public void onSuccess(SongListDetailEntity response) {
+                        if (response != null && response.getCode() == 0) {
+                            List<MusicEntity> musicEntities = response.getDataEntity().getMusic_list();
+                            if (musicEntities != null && musicEntities.size() > 0) {
+                                playlistDetailAdapter.setNewData(response.getDataEntity().getMusic_list());
+                                playlistDetailAdapter.addHeaderView(headerView);
+                            }
+                        }
+                    }
+                }, null, null);
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
         }
     }
 }

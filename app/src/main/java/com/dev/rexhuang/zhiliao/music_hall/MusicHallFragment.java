@@ -2,6 +2,7 @@ package com.dev.rexhuang.zhiliao.music_hall;
 
 import android.os.Bundle;
 import android.view.View;
+import android.widget.Toast;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.dev.rexhuang.zhiliao.MainActivity;
@@ -13,6 +14,7 @@ import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoMainFragment;
 import com.dev.rexhuang.zhiliao_core.entity.ArtistsDataInfo;
 import com.dev.rexhuang.zhiliao_core.entity.BannerEntity;
+import com.dev.rexhuang.zhiliao_core.entity.RecommendSongListEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListEntity;
 import com.dev.rexhuang.zhiliao_core.entity.User;
 import com.dev.rexhuang.zhiliao.music_hall.adapter.MultipleItemsCreator;
@@ -117,6 +119,16 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
                         }
                     }
                 }, null, null);
+                MusicLakeApi.getRecommendSongList(null, new ISuccess<RecommendSongListEntity>() {
+                    @Override
+                    public void onSuccess(RecommendSongListEntity response) {
+                        if (response != null && response.getCode() == 200){
+                            List<RecommendSongListEntity.ResultEntity> resultEntities = response.getResult();
+                            creator.setRecommendListEntity(resultEntities);
+                            multipleRecyclerAdapter.setNewData(creator.create());
+                        }
+                    }
+                },null,null);
             }
         }, null, null);
         swipe_layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {

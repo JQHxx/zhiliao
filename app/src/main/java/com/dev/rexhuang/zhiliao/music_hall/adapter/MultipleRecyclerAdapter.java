@@ -12,6 +12,7 @@ import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.music_hall.MusicHallFragment;
 import com.dev.rexhuang.zhiliao.music_hall.PlayListActivity;
 import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
+import com.dev.rexhuang.zhiliao_core.entity.RecommendSongListEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListDetailEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListEntity;
 import com.dev.rexhuang.zhiliao.music_hall.banner.BannerAdapter;
@@ -53,6 +54,7 @@ public class MultipleRecyclerAdapter extends BaseMultiItemQuickAdapter<MultipleI
         addItemType(TYPE_AGE, R.layout.item_age);
         addItemType(TYPE_TEXT, R.layout.item_text);
         addItemType(TYPE_SONGLIST, R.layout.item_songlist);
+        addItemType(TYPE_RECOMMENDSONGLIST, R.layout.item_songlist);
         mContext = context;
     }
 
@@ -61,6 +63,7 @@ public class MultipleRecyclerAdapter extends BaseMultiItemQuickAdapter<MultipleI
     private static final int TYPE_AGE = 2;//MultipleItemType.AGE.ordinal();
     private static final int TYPE_TEXT = 3;//MultipleItemType.TEXT.ordinal();
     private static final int TYPE_SONGLIST = 4;//MultipleItemType.SONGLIST.ordinal();
+    private static final int TYPE_RECOMMENDSONGLIST = 5;//MultipleItemType.SONGLIST.ordinal();
 
 
     @Override
@@ -78,6 +81,36 @@ public class MultipleRecyclerAdapter extends BaseMultiItemQuickAdapter<MultipleI
             case TYPE_AGE:
                 break;
             case TYPE_TEXT:
+                String text = item.getField(MultipleItemType.TEXT);
+                helper.setText(R.id.tv_text, text);
+                break;
+            case TYPE_RECOMMENDSONGLIST:
+                RecyclerView recommSongList = helper.getView(R.id.rv_song_list);
+                if (recommSongList.getLayoutManager() == null) {
+                    LinearLayoutManager ll = new LinearLayoutManager(mContext, LinearLayout.HORIZONTAL, false);
+                    recommSongList.setLayoutManager(ll);
+                }
+                if (recommSongList.getAdapter() == null) {
+                    List<RecommendSongListEntity.ResultEntity> resultEntities = item.getField(MultipleItemType.RECOMMONSONGLIST);
+                    RecommendSongListAdapter recommendSongListAdapter = new RecommendSongListAdapter(R.layout.item_rv_recommendsonglist, resultEntities);
+                    recommendSongListAdapter.setOnItemClickListener(new OnItemClickListener() {
+                        @Override
+                        public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
+                            RecommendSongListEntity.ResultEntity resultEntity = resultEntities.get(position);
+                            Intent intent = new Intent(mContext, PlayListActivity.class);
+                            intent.putExtra("From","NeteaseMusicApi");
+                            intent.putExtra("PlayList_ID", resultEntity.getId());
+                            intent.putExtra("PlayList_COVER", position);
+                            intent.putExtra("PlayList_NAME", resultEntity.getName());
+                            mContext.startActivity(intent);
+                        }
+                    });
+                    recommSongList.setAdapter(recommendSongListAdapter);
+                    recommendSongListAdapter.bindToRecyclerView(recommSongList);
+                } else {
+                    ((RecommendSongListAdapter) recommSongList.getAdapter()).setNewData(item.getField(MultipleItemType.RECOMMONSONGLIST));
+                }
+
                 break;
             case TYPE_SONGLIST:
                 RecyclerView songList = helper.getView(R.id.rv_song_list);
@@ -93,11 +126,12 @@ public class MultipleRecyclerAdapter extends BaseMultiItemQuickAdapter<MultipleI
                         @Override
                         public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                             SongListEntity.DataEntity dataEntity = dataEntities.get(position);
-                           Intent intent = new Intent(mContext,PlayListActivity.class);
-                           intent.putExtra("PlayList_ID",dataEntity.getId());
-                           intent.putExtra("PlayList_COVER",position);
-                           intent.putExtra("PlayList_NAME",dataEntity.getName());
-                           mContext.startActivity(intent);
+                            Intent intent = new Intent(mContext, PlayListActivity.class);
+                            intent.putExtra("From","ZhiliaoApi");
+                            intent.putExtra("PlayList_ID", dataEntity.getId());
+                            intent.putExtra("PlayList_COVER", position);
+                            intent.putExtra("PlayList_NAME", dataEntity.getName());
+                            mContext.startActivity(intent);
                         }
                     });
                     songList.setAdapter(songListAdapter);
