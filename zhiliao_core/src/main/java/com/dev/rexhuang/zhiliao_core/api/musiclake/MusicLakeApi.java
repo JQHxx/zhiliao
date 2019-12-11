@@ -3,11 +3,16 @@ package com.dev.rexhuang.zhiliao_core.api.musiclake;
 import android.util.Log;
 import android.widget.Toast;
 
+import androidx.constraintlayout.widget.Guideline;
+
 import com.dev.rexhuang.zhiliao_core.api.BaseApi;
 import com.dev.rexhuang.zhiliao_core.config.ConfigKeys;
 import com.dev.rexhuang.zhiliao_core.config.Zhiliao;
 import com.dev.rexhuang.zhiliao_core.entity.BannerEntity;
+import com.dev.rexhuang.zhiliao_core.entity.NeteaseMusicDetailEntity;
+import com.dev.rexhuang.zhiliao_core.entity.NeteaseMusicEntity;
 import com.dev.rexhuang.zhiliao_core.entity.NeteaseMusicSongListDetailEntity;
+import com.dev.rexhuang.zhiliao_core.entity.NeteaseMusicUrlEntity;
 import com.dev.rexhuang.zhiliao_core.entity.RecommendSongListEntity;
 import com.dev.rexhuang.zhiliao_core.net.NeteaseRestService;
 import com.dev.rexhuang.zhiliao_core.net.RestCreator;
@@ -38,7 +43,9 @@ public class MusicLakeApi extends BaseApi {
                 .subscribe(new Observer<BannerEntity>() {
                     @Override
                     public void onSubscribe(Disposable d) {
-
+                        if (request != null) {
+                            request.onRequestStart();
+                        }
                     }
 
                     @Override
@@ -56,6 +63,9 @@ public class MusicLakeApi extends BaseApi {
                     @Override
                     public void onComplete() {
                         Logger.d("onComplete");
+                        if (request != null) {
+                            request.onRequestEnd();
+                        }
                     }
                 });
     }
@@ -69,7 +79,9 @@ public class MusicLakeApi extends BaseApi {
 
                     @Override
                     public void onSubscribe(Disposable d) {
-
+                        if (request != null) {
+                            request.onRequestStart();
+                        }
                     }
 
                     @Override
@@ -90,6 +102,9 @@ public class MusicLakeApi extends BaseApi {
                     @Override
                     public void onComplete() {
                         Log.e("getRecommendSongList", "onComplete");
+                        if (request != null) {
+                            request.onRequestEnd();
+                        }
                     }
                 });
     }
@@ -103,7 +118,9 @@ public class MusicLakeApi extends BaseApi {
 
                     @Override
                     public void onSubscribe(Disposable d) {
-                        request.onRequestStart();
+                        if (request != null) {
+                            request.onRequestStart();
+                        }
                     }
 
                     @Override
@@ -124,7 +141,129 @@ public class MusicLakeApi extends BaseApi {
                     @Override
                     public void onComplete() {
                         Log.e("getSongListDetail", "onComplete");
-                        request.onRequestEnd();
+                        if (request != null) {
+                            request.onRequestEnd();
+                        }
+                    }
+                });
+    }
+
+    public static void getSearchMusic(String keyword, int limit, int offset, IRequest request, ISuccess success, IFailure failure, IError error) {
+        String url = "http://music.rexhuang.top/search?keywords=" + keyword + "&limit=" + limit + "&offset=" + offset;
+        Observable observable = neteaseRestService.getSearchMusic(url);
+        observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<NeteaseMusicEntity>() {
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        if (request != null) {
+                            request.onRequestStart();
+                        }
+                    }
+
+                    @Override
+                    public void onNext(NeteaseMusicEntity neteaseMusicEntity) {
+                        if (success != null) {
+                            Log.e("getSearchMusic", "success != null");
+                            success.onSuccess(neteaseMusicEntity);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        e.getMessage();
+                        Log.e("getSearchMusic", "onError");
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.e("getSearchMusic", "onComplete");
+                        if (request != null) {
+                            request.onRequestEnd();
+                        }
+
+                    }
+                });
+    }
+
+    public static void getMusicUrl(int musicID, IRequest request, ISuccess success, IFailure failure, IError error) {
+        String url = "http://music.rexhuang.top/song/url?id=" + musicID;
+        Observable observable = neteaseRestService.getMusicUrl(url);
+        observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<NeteaseMusicUrlEntity>() {
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        if (request != null) {
+                            request.onRequestStart();
+                        }
+                    }
+
+                    @Override
+                    public void onNext(NeteaseMusicUrlEntity neteaseMusicUrlEntity) {
+                        if (success != null) {
+                            Log.e("getMusicUrl", "success != null");
+                            success.onSuccess(neteaseMusicUrlEntity);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        e.getMessage();
+                        Log.e("getMusicUrl", "onError");
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.e("getMusicUrl", "onComplete");
+                        if (request != null) {
+                            request.onRequestEnd();
+                        }
+
+                    }
+                });
+    }
+
+    public static void getMusicDeatail(int musicID, IRequest request, ISuccess success, IFailure failure, IError error) {
+        String url = "http://music.rexhuang.top/song/detail?ids=" + musicID;
+        Observable observable = neteaseRestService.getMusicDeatail(url);
+        observable.subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<NeteaseMusicDetailEntity>() {
+
+                    @Override
+                    public void onSubscribe(Disposable d) {
+                        if (request != null) {
+                            request.onRequestStart();
+                        }
+                    }
+
+                    @Override
+                    public void onNext(NeteaseMusicDetailEntity neteaseMusicDetailEntity) {
+                        if (success != null) {
+                            Log.e("getMusicDeatail", "success != null");
+                            success.onSuccess(neteaseMusicDetailEntity);
+                        }
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                        e.printStackTrace();
+                        e.getMessage();
+                        Log.e("getMusicDeatail", "onError");
+                    }
+
+                    @Override
+                    public void onComplete() {
+                        Log.e("getMusicDeatail", "onComplete");
+                        if (request != null) {
+                            request.onRequestEnd();
+                        }
+
                     }
                 });
     }

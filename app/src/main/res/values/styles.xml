@@ -1,6 +1,6 @@
 <resources>
 
-    <attr name="toolbar_color" format="reference"/>
+    <attr name="toolbar_color" format="reference" />
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
@@ -21,7 +21,7 @@
     <style name="AppTheme.Splash" parent="AppTheme">
         <item name="android:windowFullscreen">true</item>
     </style>
-    
+
     <style name="AppTheme.Cool.Black.MainActivity" parent="AppTheme.Cool.Black">
 
     </style>
@@ -40,6 +40,12 @@
 
     <style name="TextApperance.Album.Title" parent="@style/TextAppearance.AppCompat.Large">
         <item name="android:textSize">29sp</item>
+    </style>
+
+    <style name="CustomTextAppearance" parent="TextAppearance.Design.Tab">
+        <item name="textAllCaps">true</item>
+        <item name="android:textAllCaps">true</item>
+        <item name="android:textSize">@dimen/sp_16</item>
     </style>
 
 </resources>

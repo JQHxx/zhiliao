@@ -26,8 +26,10 @@ import androidx.appcompat.widget.AppCompatEditText;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager.widget.ViewPager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
@@ -43,11 +45,16 @@ import com.dev.rexhuang.zhiliao.data.RecordDbDao;
 import com.dev.rexhuang.zhiliao.detail.DetailActivity;
 import com.dev.rexhuang.zhiliao.find.adapter.SearchAdapter;
 import com.dev.rexhuang.zhiliao.login.UserManager;
+import com.dev.rexhuang.zhiliao.search.adapter.NeteaseSearchAdapter;
+import com.dev.rexhuang.zhiliao.search.adapter.SearchViewpagerAdapter;
+import com.dev.rexhuang.zhiliao_core.api.musiclake.MusicLakeApi;
 import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
 import com.dev.rexhuang.zhiliao_core.base.BaseActivity;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoFragment;
 import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
+import com.dev.rexhuang.zhiliao_core.entity.NeteaseMusicEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongSearchEntity;
+import com.dev.rexhuang.zhiliao_core.entity.ZhiliaoEntity;
 import com.dev.rexhuang.zhiliao_core.net.callback.IRequest;
 import com.dev.rexhuang.zhiliao_core.net.callback.ISuccess;
 import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
@@ -57,6 +64,7 @@ import com.dev.rexhuang.zhiliao_core.utils.AnimHelper;
 import com.dev.rexhuang.zhiliao_core.utils.Utils;
 import com.dyhdyh.widget.loadingbar2.LoadingBar;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.tabs.TabLayout;
 import com.gyf.immersionbar.ImmersionBar;
 import com.library.flowlayout.FlowLayoutManager;
 import com.library.flowlayout.SpaceItemDecoration;
@@ -77,24 +85,14 @@ import me.yokeyword.fragmentation.SupportHelper;
  */
 public class SearchFragment extends ZhiliaoFragment {
 
+    //TAG
     private static final String TAG = SearchFragment.class.getSimpleName();
-    //searchRecyclerview
-    private SearchAdapter mSearchAdapter;
-    private View headerView;
+
+    SearchContentFragment searchContentFragment;
+    NeteaseSearchContentFragment neteaseSearchContentFragment;
 
     //queueDialog
     private QueueDialog queueDialog;
-
-    //moreDialog
-    private BottomSheetDialog moreDialog;
-    private TextView tv_music;
-    private TextView tv_close_more;
-    private ConstraintLayout cl_next;
-    private ConstraintLayout cl_add;
-    private ConstraintLayout cl_download;
-    private ConstraintLayout cl_share;
-    private ConstraintLayout cl_singer;
-    private ConstraintLayout cl_ablum;
 
     //mRecordDbDao
     private RecordDbDao mRecordDbDao;
@@ -102,27 +100,11 @@ public class SearchFragment extends ZhiliaoFragment {
 
     private String currentToken;
 
-    private IRequest request = new IRequest() {
-        @Override
-        public void onRequestStart() {
-            if (rl_loading != null) {
-                rl_loading.setVisibility(View.VISIBLE);
-                LoadingBar.view(rl_loading)
-                        .setFactoryFromResource(R.layout.loading_view)
-                        .show();
-            }
-        }
-
-        @Override
-        public void onRequestEnd() {
-            if (rl_loading != null) {
-                rl_loading.setVisibility(View.GONE);
-                LoadingBar.view(rl_loading).cancel();
-            }
-        }
-    };
-
     private int currentPosition = 0;
+
+    private List<BaseSearchContentFragment> fragmentList = new ArrayList<>();
+
+    List<String> titleList = new ArrayList<>();
 
     private ObjectAnimator cover_play;
     private String play = "{faw-play}";
@@ -134,11 +116,14 @@ public class SearchFragment extends ZhiliaoFragment {
     @BindView(R.id.searchbar)
     LinearLayout searchbar;
 
-    @BindView(R.id.rl_loading)
-    RelativeLayout rl_loading;
+//    @BindView(R.id.rl_loading)
+//    RelativeLayout rl_loading;
 
-    @BindView(R.id.rv_search)
-    RecyclerView rv_search;
+    @BindView(R.id.search_tab)
+    TabLayout search_tab;
+
+    @BindView(R.id.search_vp)
+    ViewPager search_vp;
 
     @BindView(R.id.searchEditText)
     AppCompatEditText searchEditText;
@@ -184,9 +169,7 @@ public class SearchFragment extends ZhiliaoFragment {
     void onClickClearSearchEdit() {
         if (searchEditText != null) {
             searchEditText.setText("");
-            cl_record.setVisibility(View.VISIBLE);
-            mSearchAdapter.removeHeaderView(headerView);
-            mSearchAdapter.setNewData(null);
+            showRecord(true);
         }
     }
 
@@ -198,8 +181,6 @@ public class SearchFragment extends ZhiliaoFragment {
             from = getArguments().getString(BaseActivity.FRGMENT_FROM);
         }
         if (TextUtils.equals(MainSwitchFragment.class.getSimpleName(), from)) {
-//            ((ISupportActivity) get_mActivity()).getSupportDelegate().showHideFragment(
-//                    SupportHelper.findFragment(getFragmentManager(), MainSwitchFragment.class), this);
             getSupportDelegate().pop();
         } else {
             getSupportDelegate().pop();
@@ -226,7 +207,6 @@ public class SearchFragment extends ZhiliaoFragment {
 
     @OnClick(R.id.song_play_button)
     void onClickPlay() {
-        Logger.d(MusicManager.getInstance().isPlaying());
         if (MusicManager.getInstance().isPlaying()) {
             pauseMusic();
         } else {
@@ -237,39 +217,30 @@ public class SearchFragment extends ZhiliaoFragment {
     public static SearchFragment newInstance(String musicId, Float rotation, String from) {
         SearchFragment searchFragment = new SearchFragment();
         Bundle args = searchFragment.getArguments();
-        if (args != null) {
-            args.putString(BaseActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION, musicId);
-            args.putFloat(BaseActivity.EXTRA_CURRENT_MEDIA_ROTATION, rotation);
-            args.putString(BaseActivity.FRGMENT_FROM, from);
-        } else {
+        if (args == null) {
             args = new Bundle();
-            args.putString(BaseActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION, musicId);
-            args.putFloat(BaseActivity.EXTRA_CURRENT_MEDIA_ROTATION, rotation);
-            args.putString(BaseActivity.FRGMENT_FROM, from);
         }
+        args.putString(BaseActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION, musicId);
+        args.putFloat(BaseActivity.EXTRA_CURRENT_MEDIA_ROTATION, rotation);
+        args.putString(BaseActivity.FRGMENT_FROM, from);
         searchFragment.setArguments(args);
         return searchFragment;
     }
 
     @Override
     public Object setLayout() {
-        Logger.t(TAG).d("setLayout");
         return R.layout.fragment_search;
     }
 
     @Override
     public void onBindView(Bundle savedInstanceState, View view) {
+        //check if is logined
         currentToken = UserManager.getInstance().getToken();
         if (TextUtils.isEmpty(currentToken)) {
             Toast.makeText(getActivity(), "您還沒登陸，在綫功能將不能使用！", Toast.LENGTH_SHORT).show();
         }
-        headerView = LayoutInflater.from(getActivity()).inflate(R.layout.item_search_header, null);
-        headerView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                MusicManager.getInstance().playMusic(mMusicEntities, 0);
-            }
-        });
+
+        //同步播放状态
         cover_play = AnimHelper.rotate(song_cover, "rotation", AnimHelper.DEFAULT_START_ROTATE,
                 AnimHelper.DEFAULT_END_ROTATE, AnimHelper.DEFAULT_DURATION,
                 ValueAnimator.INFINITE, ValueAnimator.RESTART);
@@ -297,113 +268,17 @@ public class SearchFragment extends ZhiliaoFragment {
                 showPlaying(musicEntity, true, true);
             }
         }
-        mSearchAdapter = new SearchAdapter(R.layout.item_music, new ArrayList<>());
-        mSearchAdapter.setOnItemClickListener((adapter, view1, position) -> {
-            String musicId = mSearchAdapter.getItem(position).getId();
-            String musicName = mSearchAdapter.getItem(position).getName();
-            if (!TextUtils.isEmpty(musicId) &&
-                    !musicId.equals(MusicManager.getInstance().getNowPlayingSongId())) {
-                MusicManager.getInstance().playMusicByEntity(mMusicEntities.get(position));
-            } else if (!TextUtils.isEmpty(musicName)) {
-                Logger.d(musicName + "is already playing");
-            }
-        });
-        mSearchAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
-            @Override
-            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-                currentPosition = position;
-                switch (view.getId()) {
-                    case R.id.iv_more:
-                        if (moreDialog == null) {
-                            moreDialog = DialogHelper.createMoreDialog(getActivity());
-                            cl_next = moreDialog.findViewById(R.id.cl_next);
-                            cl_add = moreDialog.findViewById(R.id.cl_add);
-                            cl_download = moreDialog.findViewById(R.id.cl_download);
-                            cl_share = moreDialog.findViewById(R.id.cl_share);
-                            cl_singer = moreDialog.findViewById(R.id.cl_singer);
-                            cl_ablum = moreDialog.findViewById(R.id.cl_album);
-                            tv_music = moreDialog.findViewById(R.id.tv_music);
-                            tv_close_more = moreDialog.findViewById(R.id.tv_close);
-                            cl_next.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    MusicManager.getInstance().playMusicByEntity(mMusicEntities.get(currentPosition));
-                                    moreDialog.hide();
-                                }
-                            });
-                            cl_add.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    MusicManager.getInstance().addToMusicQueue(mMusicEntities.get(currentPosition));
-                                    moreDialog.hide();
-                                    Toast.makeText(getContext(), mMusicEntities.get(currentPosition).getName() + "已加入歌单!", Toast.LENGTH_SHORT).show();
-                                }
-                            });
-                            cl_download.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                }
-                            });
-                            cl_share.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                }
-                            });
-                            cl_singer.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                }
-                            });
-                            cl_ablum.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                }
-                            });
-                            tv_close_more.setOnClickListener(new View.OnClickListener() {
-                                @Override
-                                public void onClick(View v) {
-                                    if (moreDialog != null) {
-                                        moreDialog.dismiss();
-                                    }
-                                }
-                            });
-                        }
-                        tv_music.setText(mMusicEntities.get(position).getName());
-                        moreDialog.show();
-                        break;
-                    default:
-                        break;
-                }
-            }
-        });
-        rv_search.setLayoutManager(new LinearLayoutManager(get_mActivity()));
-        rv_search.setAdapter(mSearchAdapter);
+
+        //监听搜索框的内容变化
         searchEditText.setOnEditorActionListener((v, actionId, event) -> {
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 Logger.d("执行搜索");
                 String query = searchEditText.getText().toString();
-                if (!TextUtils.isEmpty(query) && query.length() > 0) {
+                if (!TextUtils.isEmpty(query)) {
                     mRecordDbDao.insertData(query);
                     mRecordAdapter.setNewData(mRecordDbDao.queryData(""));
-                    cl_record.setVisibility(View.GONE);
-                    ZhiliaoApi.getMusic(currentToken, "keyword", query, request, new ISuccess<SongSearchEntity>() {
-                        @Override
-                        public void onSuccess(SongSearchEntity response) {
-                            SearchFragment.this.mSongSearchEntity = response;
-                            SearchFragment.this.mMusicEntities = mSongSearchEntity.getData();
-//                            MusicProvider.getInstance().setMusicList(SearchFragment.this.mMusicEntities);
-                            if (mMusicEntities == null || mMusicEntities.size() <= 0) {
-                                Toast.makeText(getActivity(), "不好意思,没有您想要找的歌曲！", Toast.LENGTH_SHORT).show();
-                            } else {
-                                if (mSearchAdapter.getHeaderLayoutCount() <= 0) {
-                                    mSearchAdapter.addHeaderView(headerView);
-                                }
-                                mSearchAdapter.getData().clear();
-                                mSearchAdapter.setNewData(mMusicEntities);
-                            }
-                        }
-                    }, null, null);
-
+                    showRecord(false);
+                    fragmentList.get(search_vp.getCurrentItem()).showSearchContent(query);
                 }
             }
             return false;
@@ -446,6 +321,8 @@ public class SearchFragment extends ZhiliaoFragment {
         InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.toggleSoftInput(InputMethodManager.SHOW_IMPLICIT, InputMethodManager.HIDE_NOT_ALWAYS);
 //        getActivity().getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE);
+
+        //监听播放器状态变化
         onPlayerEventListener = new OnPlayerEventListener() {
             @Override
             public void onQueueChanged(List<MediaSessionCompat.QueueItem> queue) {
@@ -523,6 +400,8 @@ public class SearchFragment extends ZhiliaoFragment {
             }
         };
         MusicManager.getInstance().addPlayerEventListener(onPlayerEventListener);
+
+        //填充搜索历史列表
         mRecordDbDao = new RecordDbDao(getActivity());
         mRecordAdapter = new RecordAdapter(R.layout.item_record);
         rv_record.setLayoutManager(new FlowLayoutManager());
@@ -536,31 +415,60 @@ public class SearchFragment extends ZhiliaoFragment {
                 searchEditText.setText(query);
                 searchEditText.setSelection(query.length());
                 hideSoftInput(searchEditText);
-                cl_record.setVisibility(View.GONE);
-                ZhiliaoApi.getMusic(currentToken, "keyword", query, request, new ISuccess<SongSearchEntity>() {
-                    @Override
-                    public void onSuccess(SongSearchEntity response) {
-                        SearchFragment.this.mSongSearchEntity = response;
-                        SearchFragment.this.mMusicEntities = mSongSearchEntity.getData();
-                        if (mMusicEntities == null || mMusicEntities.size() <= 0) {
-                            Toast.makeText(getActivity(), "不好意思,没有您想要找的歌曲！", Toast.LENGTH_SHORT).show();
-                        } else {
-                            if (mSearchAdapter.getHeaderLayoutCount() <= 0) {
-                                mSearchAdapter.addHeaderView(headerView);
-                            }
-                            mSearchAdapter.getData().clear();
-                            mSearchAdapter.setNewData(mMusicEntities);
-                        }
-                    }
-                }, null, null);
+                showRecord(false);
+                fragmentList.get(search_vp.getCurrentItem()).showSearchContent(query);
             }
         });
+
+        //搜索内容展示
+        searchContentFragment = SearchContentFragment.newInstance(currentToken);
+        neteaseSearchContentFragment = NeteaseSearchContentFragment.newInstance();
+        fragmentList.add(searchContentFragment);
+        fragmentList.add(neteaseSearchContentFragment);
+        titleList.add("知了");
+        titleList.add("网易云");
+        search_vp.setAdapter(new SearchViewpagerAdapter(getChildFragmentManager(), fragmentList, titleList));
+        search_vp.setCurrentItem(0);
+        search_vp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                String query = searchEditText.getText().toString();
+                if (!TextUtils.isEmpty(query)) {
+                    fragmentList.get(position).showSearchContent(query);
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
+        search_tab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
+            @Override
+            public void onTabSelected(TabLayout.Tab tab) {
+                search_vp.setCurrentItem(tab.getPosition());//点击哪个就跳转哪个界面
+            }
+
+            @Override
+            public void onTabUnselected(TabLayout.Tab tab) {
+            }
+
+            @Override
+            public void onTabReselected(TabLayout.Tab tab) {
+            }
+        });
+        search_tab.setupWithViewPager(search_vp);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        ImmersionBar.setTitleBar(getActivity(),searchbar);
+        ImmersionBar.setTitleBar(getActivity(), searchbar);
     }
 
     @Override
@@ -693,4 +601,17 @@ public class SearchFragment extends ZhiliaoFragment {
         InputMethodManager imm = (InputMethodManager) get_mActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
         imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
     }
+
+    public void showRecord(boolean b){
+        if (b){
+            cl_record.setVisibility(View.VISIBLE);
+            search_tab.setVisibility(View.GONE);
+            search_vp.setVisibility(View.GONE);
+        } else {
+            cl_record.setVisibility(View.GONE);
+            search_tab.setVisibility(View.VISIBLE);
+            search_vp.setVisibility(View.VISIBLE);
+        }
+    }
+
 }

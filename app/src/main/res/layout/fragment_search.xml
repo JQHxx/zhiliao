@@ -10,11 +10,20 @@
 
     <include layout="@layout/searchbar" />
 
-    <RelativeLayout
-        android:id="@+id/rl_loading"
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/search_tab"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone" />
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:tabTextAppearance="@style/CustomTextAppearance"
+        app:tabIndicatorColor="@color/switch_selected"
+        app:tabTextColor="@color/white" />
+
+    <!--<RelativeLayout-->
+        <!--android:id="@+id/rl_loading"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="match_parent"-->
+        <!--android:visibility="gone" />-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/cl_record"
@@ -67,15 +76,23 @@
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_search"
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/search_vp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="8"
         android:background="@color/toolbar"
-        android:clipToPadding="false"
-        android:overScrollMode="never"
         android:paddingTop="8dp" />
+
+    <!--<androidx.recyclerview.widget.RecyclerView-->
+    <!--android:id="@+id/rv_search"-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="0dp"-->
+    <!--android:layout_weight="8"-->
+    <!--android:background="@color/toolbar"-->
+    <!--android:clipToPadding="false"-->
+    <!--android:overScrollMode="never"-->
+    <!--android:paddingTop="8dp" />-->
 
 
     <include
