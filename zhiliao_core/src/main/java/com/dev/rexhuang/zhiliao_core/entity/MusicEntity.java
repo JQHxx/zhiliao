@@ -4,6 +4,9 @@ import android.graphics.Bitmap;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
+
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -226,5 +229,19 @@ public class MusicEntity implements Parcelable {
 
     public void setCoverBitmap(Bitmap coverBitmap) {
         this.coverBitmap = coverBitmap;
+    }
+
+    public static MusicEntity create(String id, String name, String singerName, String music_url, String cover_url) {
+        MusicEntity musicEntity = new MusicEntity();
+        musicEntity.setId(id);
+        musicEntity.setName(name);
+        List<SingersEntity> singers = new ArrayList<>();
+        SingersEntity singersEntity = new SingersEntity();
+        singersEntity.setName(singerName);
+        singers.add(singersEntity);
+        musicEntity.setSingers(singers);
+        musicEntity.setNormal(music_url);
+        musicEntity.setCover(cover_url);
+        return musicEntity;
     }
 }

@@ -12,6 +12,7 @@ import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.music_hall.MusicHallFragment;
 import com.dev.rexhuang.zhiliao.music_hall.PlayListActivity;
 import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
+import com.dev.rexhuang.zhiliao_core.entity.BannerEntity;
 import com.dev.rexhuang.zhiliao_core.entity.RecommendSongListEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListDetailEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListEntity;
@@ -70,7 +71,7 @@ public class MultipleRecyclerAdapter extends BaseMultiItemQuickAdapter<MultipleI
     protected void convert(@NonNull BaseViewHolder helper, MultipleItemEntity item) {
         switch (helper.getItemViewType()) {
             case TYPE_BANNER:
-                List<String> images = item.getField(MultipleItemType.BANNER);
+                List<BannerEntity.BannersEntity> images = item.getField(MultipleItemType.BANNER);
                 LoopBanner loopBanner = helper.getView(R.id.banner);
                 BannerAdapter bannerAdapter = new BannerAdapter();
                 bannerAdapter.setNewData(images);

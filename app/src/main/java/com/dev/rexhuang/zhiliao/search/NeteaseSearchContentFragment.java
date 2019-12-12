@@ -69,16 +69,21 @@ public class NeteaseSearchContentFragment extends BaseSearchContentFragment {
                                 @Override
                                 public void onSuccess(NeteaseMusicUrlEntity response) {
                                     if (response != null && response.getCode() == 200) {
-                                        MusicEntity musicEntity = new MusicEntity();
-                                        musicEntity.setId(String.valueOf(musicId));
-                                        musicEntity.setName(mNeteaseSearchAdapter.getItem(position).getName());
-                                        List<SingersEntity> singers = new ArrayList<>();
-                                        SingersEntity singersEntity = new SingersEntity();
-                                        singersEntity.setName(mNeteaseSearchAdapter.getItem(position).getArtists().get(0).getName());
-                                        singers.add(singersEntity);
-                                        musicEntity.setSingers(singers);
-                                        musicEntity.setNormal(response.getData().get(0).getUrl());
-                                        musicEntity.setCover(picUrl);
+                                        MusicEntity musicEntity = MusicEntity.create(String.valueOf(musicId),
+                                                mNeteaseSearchAdapter.getItem(position).getName(),
+                                                mNeteaseSearchAdapter.getItem(position).getArtists().get(0).getName(),
+                                                response.getData().get(0).getUrl(),
+                                                picUrl);
+//                                        MusicEntity musicEntity = new MusicEntity();
+//                                        musicEntity.setId(String.valueOf(musicId));
+//                                        musicEntity.setName(mNeteaseSearchAdapter.getItem(position).getName());
+//                                        List<SingersEntity> singers = new ArrayList<>();
+//                                        SingersEntity singersEntity = new SingersEntity();
+//                                        singersEntity.setName(mNeteaseSearchAdapter.getItem(position).getArtists().get(0).getName());
+//                                        singers.add(singersEntity);
+//                                        musicEntity.setSingers(singers);
+//                                        musicEntity.setNormal(response.getData().get(0).getUrl());
+//                                        musicEntity.setCover(picUrl);
                                         MusicManager.getInstance().playMusicByEntity(musicEntity);
                                     }
                                 }

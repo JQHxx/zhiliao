@@ -1,5 +1,6 @@
 package com.dev.rexhuang.zhiliao.music_hall.adapter;
 
+import com.dev.rexhuang.zhiliao_core.entity.BannerEntity;
 import com.dev.rexhuang.zhiliao_core.entity.RecommendSongListEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListEntity;
 
@@ -17,11 +18,12 @@ public class MultipleItemsCreator {
     private List<MultipleItemEntity> multipleItemEntities = new ArrayList<>();
     private List<SongListEntity.DataEntity> dataEntity;
     private List<RecommendSongListEntity.ResultEntity> resultEntities;
-    private List<String> imagesArray;
+    private List<BannerEntity.BannersEntity> imagesArray;
 
-    public MultipleItemsCreator(List<SongListEntity.DataEntity> dataEntity, List<String> imagesArray) {
+//    , List<BannerEntity.BannersEntity> imagesArray
+    public MultipleItemsCreator(List<SongListEntity.DataEntity> dataEntity) {
         this.dataEntity = dataEntity;
-        this.imagesArray = imagesArray;
+//        this.imagesArray = imagesArray;
     }
 
     public void setDataEntity(List<SongListEntity.DataEntity> dataEntity) {
@@ -32,14 +34,14 @@ public class MultipleItemsCreator {
         this.resultEntities = resultEntities;
     }
 
-    public void setImagesArray(List<String> imagesArray) {
+    public void setImagesArray(List<BannerEntity.BannersEntity> imagesArray) {
         this.imagesArray = imagesArray;
     }
 
     public List<MultipleItemEntity> create() {
-        if (imagesArray == null) {
-            throw new RuntimeException("imagesArray is not ready,call setImagesArray");
-        }
+//        if (imagesArray == null) {
+//            throw new RuntimeException("imagesArray is not ready,call setImagesArray");
+//        }
         if (dataEntity == null) {
             throw new RuntimeException("SongListEntity.DataEntity dataEntity is not ready,call setDataEntity");
         }

@@ -90,7 +90,8 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
             @Override
             public void onSuccess(SongListEntity songListEntity) {
                 MusicHallFragment.this.songListEntity = songListEntity;
-                creator = new MultipleItemsCreator(MusicHallFragment.this.songListEntity.getData(), imagesArray);
+//                , imagesArray
+                creator = new MultipleItemsCreator(MusicHallFragment.this.songListEntity.getData());
                 multipleRecyclerAdapter = new MultipleRecyclerAdapter(_mActivity, creator.create());
                 multipleRecyclerAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
                     @Override
@@ -108,13 +109,13 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
                 MusicLakeApi.getBanner(null, new ISuccess<BannerEntity>() {
                     @Override
                     public void onSuccess(BannerEntity response) {
-                        if (response != null) {
+                        if (response != null && response.getCode() == 200) {
                             List<BannerEntity.BannersEntity> bannersEntities = response.getBanners();
-                            List<String> images = new ArrayList<>();
-                            for (BannerEntity.BannersEntity bannersEntity : bannersEntities) {
-                                images.add(bannersEntity.getImageUrl());
-                            }
-                            creator.setImagesArray(images);
+//                            List<String> images = new ArrayList<>();
+//                            for (BannerEntity.BannersEntity bannersEntity : bannersEntities) {
+//                                images.add(bannersEntity.getImageUrl());
+//                            }
+                            creator.setImagesArray(bannersEntities);
                             multipleRecyclerAdapter.setNewData(creator.create());
                         }
                     }
