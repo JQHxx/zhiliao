@@ -3,6 +3,7 @@ package com.dev.rexhuang.zhiliao;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.TextUtils;
 
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoActivity;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoFragment;
@@ -18,7 +19,6 @@ public class MainActivity extends ZhiliaoActivity {
     protected ZhiliaoSwitchFragment mZhiliaoSwitchFragment;
 
     private Bundle mSavedInstanceState;
-//    private MainSwitchFragment mainSwitchFragment;
 
     @Override
     public void loadContainerFragment(ZhiliaoFragment fragment) {
@@ -38,7 +38,7 @@ public class MainActivity extends ZhiliaoActivity {
             mZhiliaoSwitchFragment = new MainSwitchFragment();
             String mediaId = initializeFromParams(mSavedInstanceState, getIntent());
             Bundle args = new Bundle();
-            if (mediaId != null && mediaId.length() > 0) {
+            if (!TextUtils.isEmpty(mediaId)) {
                 args.putString(MEDIA_ID_KEY, mediaId);
             }
             mZhiliaoSwitchFragment.setArguments(args);
@@ -48,32 +48,17 @@ public class MainActivity extends ZhiliaoActivity {
         }
         //ButterKnife
         ButterKnife.bind(this);
+        //Starrysky
         MediaSessionConnection.getInstance().connect();
 //        切换主题
 //        setTheme(R.style.AppTheme_Elegant_White);
-    }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-//        try {
-//            ZhiliaoApi.signIn(this,"562520840@qq.com","584800");
-//            ZhiliaoApi.user(TOKEN,"172911","nickname","rexRestFormApp2");
-//            ZhiliaoApi.music(this,TOKEN,"myrj59xigr","rwunn4b886f");
-//        } catch (JSONException e) {
-//            e.printStackTrace();
-//        }
     }
 
     private String initializeFromParams(Bundle savedInstanceState, Intent intent) {
         String mediaId = null;
 
         if (intent.getAction() != null && intent.getAction().equals(MediaStore.INTENT_ACTION_MEDIA_PLAY_FROM_SEARCH)) {
+
         } else {
             if (savedInstanceState != null) {
                 mediaId = savedInstanceState.getString(SAVED_MEDIA_ID);

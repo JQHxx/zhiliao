@@ -2,21 +2,18 @@ package com.dev.rexhuang.zhiliao.music_hall;
 
 import android.os.Bundle;
 import android.view.View;
-import android.widget.Toast;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.dev.rexhuang.zhiliao.MainActivity;
 import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.event.MusicHallEvent;
+import com.dev.rexhuang.zhiliao.login.UserManager;
 import com.dev.rexhuang.zhiliao_core.api.musiclake.MusicLakeApi;
-import com.dev.rexhuang.zhiliao_core.api.qq.QQMusicApi;
 import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoMainFragment;
-import com.dev.rexhuang.zhiliao_core.entity.ArtistsDataInfo;
 import com.dev.rexhuang.zhiliao_core.entity.BannerEntity;
 import com.dev.rexhuang.zhiliao_core.entity.RecommendSongListEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListEntity;
-import com.dev.rexhuang.zhiliao_core.entity.User;
 import com.dev.rexhuang.zhiliao.music_hall.adapter.MultipleItemsCreator;
 import com.dev.rexhuang.zhiliao.music_hall.adapter.MultipleRecyclerAdapter;
 import com.dev.rexhuang.zhiliao.music_hall.adapter.SongListAdapter;
@@ -25,6 +22,8 @@ import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.BrokenBarrierException;
+import java.util.concurrent.CyclicBarrier;
 
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -36,7 +35,6 @@ import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
 
 import butterknife.BindView;
-import butterknife.OnClick;
 
 /**
  * *  created by RexHuang
@@ -44,7 +42,8 @@ import butterknife.OnClick;
  */
 public class MusicHallFragment extends ZhiliaoMainFragment {
 
-    public static final String TOKEN = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiMTcyOTExIiwiZXhwIjoxNTkzOTY0MDQ5LCJpYXQiOjE1NjI4NjAwNDl9.d9f_6ikO6gDD5Dcra7nxSzkzI8lP6vI4UI4SR32aiRU";
+    private final int count = 3;
+    private CyclicBarrier cyclicBarrier = new CyclicBarrier(count);
     private MultipleItemsCreator creator;
 
     @BindView(R.id.rv_music_hall)
@@ -53,9 +52,6 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
     @BindView(R.id.swipe_layout)
     SwipeRefreshLayout swipe_layout;
 
-
-    //    @BindView(R2.id.rv_song_list)
-    //    RecyclerView rv_song_list;
 
     private List<String> imagesArray = new ArrayList<>();
     private String[] images = {
@@ -76,62 +72,31 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
 
     @Override
     public void onBindView(Bundle savedInstanceState, View view) {
-        initViewList();
+        initBannerList();
         LinearLayoutManager lp = new LinearLayoutManager(_mActivity);
         lp.setOrientation(RecyclerView.VERTICAL);
         rv_music_hall.setLayoutManager(lp);
-        ZhiliaoApi.profile(TOKEN, null, new ISuccess<User>() {
+//        ZhiliaoApi.profile(UserManager.getInstance().getToken(), null, new ISuccess<User>() {
+//            @Override
+//            public void onSuccess(User user) {
+//            }
+//        }, null, null);
+        creator = new MultipleItemsCreator();
+        multipleRecyclerAdapter = new MultipleRecyclerAdapter(_mActivity, creator.create());
+        multipleRecyclerAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
             @Override
-            public void onSuccess(User user) {
-//                Toast.makeText(getActivity(), user.toString(), Toast.LENGTH_SHORT).show();
+            public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
+                switch (view.getId()) {
+                    case R.id.layout_singer:
+                        ((MainActivity) getActivity()).getSupportDelegate().start(new ArtistListFragment());
+                        break;
+                    default:
+                        break;
+                }
             }
-        }, null, null);
-        ZhiliaoApi.musicbillList(TOKEN, null, new ISuccess<SongListEntity>() {
-            @Override
-            public void onSuccess(SongListEntity songListEntity) {
-                MusicHallFragment.this.songListEntity = songListEntity;
-//                , imagesArray
-                creator = new MultipleItemsCreator(MusicHallFragment.this.songListEntity.getData());
-                multipleRecyclerAdapter = new MultipleRecyclerAdapter(_mActivity, creator.create());
-                multipleRecyclerAdapter.setOnItemChildClickListener(new BaseQuickAdapter.OnItemChildClickListener() {
-                    @Override
-                    public void onItemChildClick(BaseQuickAdapter adapter, View view, int position) {
-                        switch (view.getId()) {
-                            case R.id.layout_singer:
-                                ((MainActivity)getActivity()).getSupportDelegate().start(new ArtistListFragment());
-                                break;
-                            default:
-                                break;
-                        }
-                    }
-                });
-                rv_music_hall.setAdapter(multipleRecyclerAdapter);
-                MusicLakeApi.getBanner(null, new ISuccess<BannerEntity>() {
-                    @Override
-                    public void onSuccess(BannerEntity response) {
-                        if (response != null && response.getCode() == 200) {
-                            List<BannerEntity.BannersEntity> bannersEntities = response.getBanners();
-//                            List<String> images = new ArrayList<>();
-//                            for (BannerEntity.BannersEntity bannersEntity : bannersEntities) {
-//                                images.add(bannersEntity.getImageUrl());
-//                            }
-                            creator.setImagesArray(bannersEntities);
-                            multipleRecyclerAdapter.setNewData(creator.create());
-                        }
-                    }
-                }, null, null);
-                MusicLakeApi.getRecommendSongList(null, new ISuccess<RecommendSongListEntity>() {
-                    @Override
-                    public void onSuccess(RecommendSongListEntity response) {
-                        if (response != null && response.getCode() == 200){
-                            List<RecommendSongListEntity.ResultEntity> resultEntities = response.getResult();
-                            creator.setRecommendListEntity(resultEntities);
-                            multipleRecyclerAdapter.setNewData(creator.create());
-                        }
-                    }
-                },null,null);
-            }
-        }, null, null);
+        });
+        rv_music_hall.setAdapter(multipleRecyclerAdapter);
+        getData();
         swipe_layout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -142,16 +107,10 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
     }
 
     private void refreshUI() {
-        ZhiliaoApi.musicbillList(TOKEN, null, new ISuccess<SongListEntity>() {
-            @Override
-            public void onSuccess(SongListEntity songListEntity) {
-                MusicHallFragment.this.songListEntity = songListEntity;
-                EventBus.getDefault().post(new MusicHallEvent(songListEntity.getData()));
-            }
-        }, null, null);
+        getData();
     }
 
-    private void initViewList() {
+    private void initBannerList() {
         int size = images.length;
         for (int i = 0; i < size; i++) {
             imagesArray.add(images[i]);
@@ -165,9 +124,7 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(MusicHallEvent event) {
-        creator.setDataEntity(event.dataEntities);
-        multipleRecyclerAdapter.setNewData(creator.create());
-        multipleRecyclerAdapter.notifyDataSetChanged();
+        multipleRecyclerAdapter.setNewData(event.multipleItemEntities);
         swipe_layout.setRefreshing(false);
     }
 
@@ -181,5 +138,61 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
     public void onStop() {
         EventBus.getDefault().unregister(this);
         super.onStop();
+    }
+
+    private void getData() {
+        ZhiliaoApi.musicbillList(UserManager.getInstance().getToken(), null, new ISuccess<SongListEntity>() {
+            @Override
+            public void onSuccess(SongListEntity songListEntity) {
+                new Thread() {
+                    @Override
+                    public void run() {
+                        super.run();
+                        MusicHallFragment.this.songListEntity = songListEntity;
+                        creator.setDataEntity(songListEntity.getData());
+                        try {
+                            cyclicBarrier.await();
+                        } catch (BrokenBarrierException e) {
+                            e.printStackTrace();
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        EventBus.getDefault().post(new MusicHallEvent(creator.create()));
+                    }
+                }.start();
+            }
+        }, null, null);
+        MusicLakeApi.getBanner(null, new ISuccess<BannerEntity>() {
+            @Override
+            public void onSuccess(BannerEntity response) {
+                if (response != null && response.getCode() == 200) {
+                    List<BannerEntity.BannersEntity> bannersEntities = response.getBanners();
+                    creator.setImagesArray(bannersEntities);
+                    try {
+                        cyclicBarrier.await();
+                    } catch (BrokenBarrierException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, null, null);
+        MusicLakeApi.getRecommendSongList(null, new ISuccess<RecommendSongListEntity>() {
+            @Override
+            public void onSuccess(RecommendSongListEntity response) {
+                if (response != null && response.getCode() == 200) {
+                    List<RecommendSongListEntity.ResultEntity> resultEntities = response.getResult();
+                    creator.setRecommendListEntity(resultEntities);
+                    try {
+                        cyclicBarrier.await();
+                    } catch (BrokenBarrierException e) {
+                        e.printStackTrace();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }, null, null);
     }
 }

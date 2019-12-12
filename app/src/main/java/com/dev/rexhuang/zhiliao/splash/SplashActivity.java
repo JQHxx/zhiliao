@@ -48,19 +48,6 @@ public class SplashActivity extends ZhiliaoActivity implements ISplashListener {
         checkPermission();
     }
 
-    @Override
-    public void onSplashEnd(Bundle savedInstanceState, Intent intent) {
-//        Intent mainIntent = new Intent(SplashActivity.this, MainActivity.class);
-        Intent mainIntent = new Intent();
-        if (UserManager.getInstance().isLogin()) {
-            mainIntent.setComponent(new ComponentName(SplashActivity.this, MainActivity.class));
-        } else {
-            mainIntent.setComponent(new ComponentName(SplashActivity.this, LoginActivity.class));
-        }
-        startActivity(mainIntent);
-        this.finish();
-    }
-
     @SuppressLint("CheckResult")
     @Override
     public void checkPermission() {
@@ -79,6 +66,18 @@ public class SplashActivity extends ZhiliaoActivity implements ISplashListener {
                         }
                     });
         }
+    }
+
+    @Override
+    public void onSplashEnd() {
+        Intent mainIntent = new Intent();
+        if (UserManager.getInstance().isLogined()) {
+            mainIntent.setComponent(new ComponentName(SplashActivity.this, MainActivity.class));
+        } else {
+            mainIntent.setComponent(new ComponentName(SplashActivity.this, LoginActivity.class));
+        }
+        startActivity(mainIntent);
+        finish();
     }
 
 }

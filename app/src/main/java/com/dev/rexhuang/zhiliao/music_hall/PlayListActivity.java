@@ -17,6 +17,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.dev.rexhuang.zhiliao.R;
+import com.dev.rexhuang.zhiliao.login.UserManager;
 import com.dev.rexhuang.zhiliao.music_hall.adapter.NeteasePlayListDetailAdapter;
 import com.dev.rexhuang.zhiliao.music_hall.adapter.PlayListDetailAdapter;
 import com.dev.rexhuang.zhiliao_core.api.musiclake.MusicLakeApi;
@@ -152,7 +153,7 @@ public class PlayListActivity extends ZhiliaoActivity {
             playlistDetailAdapter = new PlayListDetailAdapter(R.layout.item_music_zhiliao, new ArrayList<>());
             playlist_rv.setAdapter(playlistDetailAdapter);
             try {
-                ZhiliaoApi.musicbill(MusicHallFragment.TOKEN, playList_ID, request, new ISuccess<SongListDetailEntity>() {
+                ZhiliaoApi.musicbill(UserManager.getInstance().getToken(), playList_ID, request, new ISuccess<SongListDetailEntity>() {
                     @Override
                     public void onSuccess(SongListDetailEntity response) {
                         if (response != null && response.getCode() == 0) {

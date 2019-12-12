@@ -36,9 +36,6 @@ import butterknife.OnClick;
  */
 public class LoginFragment extends ZhiliaoFragment implements ITimerListener {
 
-    private String currentUser;
-    private String currentVerify;
-
     @BindView(R.id.et_user)
     TextView et_user;
 
@@ -81,7 +78,9 @@ public class LoginFragment extends ZhiliaoFragment implements ITimerListener {
                             if (ZhiliaoApiHelper.isSuccess(user)) {
                                 if (UserManager.getInstance().putUser(user)) {
                                     Toast.makeText(getActivity(), "登录成功!", Toast.LENGTH_SHORT).show();
-                                    startTomain();
+                                    if (mLoginStatusListener != null) {
+                                        mLoginStatusListener.onLogin();
+                                    }
                                 }
                             } else {
                                 Toast.makeText(getActivity(), user.getMessage(), Toast.LENGTH_SHORT).show();
@@ -128,6 +127,10 @@ public class LoginFragment extends ZhiliaoFragment implements ITimerListener {
         }
     };
 
+    private String currentUser;
+    private String currentVerify;
+    private ILoginStatusListener mLoginStatusListener;
+
     public static LoginFragment newInstance() {
         return new LoginFragment();
     }
@@ -155,7 +158,6 @@ public class LoginFragment extends ZhiliaoFragment implements ITimerListener {
                 }
             }
         });
-
     }
 
     private void resetVerify() {
@@ -173,16 +175,16 @@ public class LoginFragment extends ZhiliaoFragment implements ITimerListener {
         cancelTimer();
     }
 
-    private void startTomain() {
-        Intent mainIntent = new Intent(getActivity(), MainActivity.class);
-        startActivity(mainIntent);
-        getActivity().finish();
-    }
 
     private void cancelTimer() {
         if (mTimer != null) {
             mTimer.cancel();
             mTimer = null;
         }
+    }
+
+    public LoginFragment withLoginStatusListener(ILoginStatusListener mLoginStatusListener) {
+        this.mLoginStatusListener = mLoginStatusListener;
+        return this;
     }
 }

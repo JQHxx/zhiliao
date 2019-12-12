@@ -11,10 +11,12 @@ import androidx.fragment.app.Fragment;
 
 import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.event.MessageEvent;
+import com.dev.rexhuang.zhiliao.login.UserManager;
 import com.dev.rexhuang.zhiliao.music_hall.MusicHallFragment;
 import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
 import com.dev.rexhuang.zhiliao_core.base.BaseActivity;
 import com.dev.rexhuang.zhiliao_core.entity.LyricEntity;
+import com.dev.rexhuang.zhiliao_core.entity.User;
 import com.dev.rexhuang.zhiliao_core.net.callback.ISuccess;
 import com.dev.rexhuang.zhiliao_core.player2.manager.MusicManager;
 
@@ -97,7 +99,7 @@ public class LyricFragment extends Fragment {
     }
 
     private void getLyric(String musicId) {
-        ZhiliaoApi.getlyric(MusicHallFragment.TOKEN, musicId, null,
+        ZhiliaoApi.getlyric(UserManager.getInstance().getToken(), musicId, null,
                 new ISuccess<LyricEntity>() {
                     @Override
                     public void onSuccess(LyricEntity response) {

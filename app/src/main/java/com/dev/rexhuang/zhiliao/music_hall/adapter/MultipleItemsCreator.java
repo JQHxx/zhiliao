@@ -20,9 +20,9 @@ public class MultipleItemsCreator {
     private List<RecommendSongListEntity.ResultEntity> resultEntities;
     private List<BannerEntity.BannersEntity> imagesArray;
 
-//    , List<BannerEntity.BannersEntity> imagesArray
-    public MultipleItemsCreator(List<SongListEntity.DataEntity> dataEntity) {
-        this.dataEntity = dataEntity;
+//    List<SongListEntity.DataEntity> dataEntity, List<BannerEntity.BannersEntity> imagesArray
+    public MultipleItemsCreator() {
+//        this.dataEntity = dataEntity;
 //        this.imagesArray = imagesArray;
     }
 
@@ -42,9 +42,9 @@ public class MultipleItemsCreator {
 //        if (imagesArray == null) {
 //            throw new RuntimeException("imagesArray is not ready,call setImagesArray");
 //        }
-        if (dataEntity == null) {
-            throw new RuntimeException("SongListEntity.DataEntity dataEntity is not ready,call setDataEntity");
-        }
+//        if (dataEntity == null) {
+//            throw new RuntimeException("SongListEntity.DataEntity dataEntity is not ready,call setDataEntity");
+//        }
         multipleItemEntities.clear();
         MultipleItemEntity bannerItem = new MultipleItemEntity();
         bannerItem.setField(MultipleItemType.ITEM_TYPE, MultipleItemType.BANNER.ordinal());

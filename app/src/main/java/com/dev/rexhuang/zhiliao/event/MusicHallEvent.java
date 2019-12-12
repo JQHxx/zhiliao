@@ -1,5 +1,6 @@
 package com.dev.rexhuang.zhiliao.event;
 
+import com.dev.rexhuang.zhiliao.music_hall.adapter.MultipleItemEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListEntity;
 
 import java.util.List;
@@ -9,10 +10,10 @@ import java.util.List;
  * *  on 2019/9/12
  */
 public class MusicHallEvent {
-    public final List<SongListEntity.DataEntity> dataEntities;
+    public final List<MultipleItemEntity> multipleItemEntities;
 
-    public MusicHallEvent(List<SongListEntity.DataEntity> dataEntities) {
-        this.dataEntities = dataEntities;
+    public MusicHallEvent(List<MultipleItemEntity> multipleItemEntities) {
+        this.multipleItemEntities = multipleItemEntities;
     }
 
 }

@@ -39,7 +39,7 @@ public class MusicLakeApi extends BaseApi {
         String url = "http://music.rexhuang.top/banner";
         Observable observable = neteaseRestService.getBanner(url);
         observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
                 .subscribe(new Observer<BannerEntity>() {
                     @Override
                     public void onSubscribe(Disposable d) {
@@ -74,7 +74,7 @@ public class MusicLakeApi extends BaseApi {
         String url = "http://music.rexhuang.top/personalized?limit=10";
         Observable observable = neteaseRestService.getRecommendSongList(url);
         observable.subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
+                .observeOn(Schedulers.io())
                 .subscribe(new Observer<RecommendSongListEntity>() {
 
                     @Override

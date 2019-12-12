@@ -107,7 +107,7 @@ public class UserManager {
         return mSharedPreferenceHelper;
     }
 
-    public boolean isLogin() {
+    public boolean isLogined() {
         if (!TextUtils.isEmpty(getSharePreferences().getString(ID, null))) {
             return true;
         }

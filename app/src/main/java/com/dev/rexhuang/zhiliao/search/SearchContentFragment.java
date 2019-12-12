@@ -21,6 +21,7 @@ import com.dev.rexhuang.zhiliao.DialogHelper;
 import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.find.adapter.SearchAdapter;
 import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
+import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApiHelper;
 import com.dev.rexhuang.zhiliao_core.entity.MusicEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongSearchEntity;
 import com.dev.rexhuang.zhiliao_core.net.callback.IRequest;
@@ -168,7 +169,7 @@ public class SearchContentFragment extends BaseSearchContentFragment {
         LinearLayoutManager layoutManager = new LinearLayoutManager(getActivity());
         rv_search.setLayoutManager(layoutManager);
         rv_search.setAdapter(mSearchAdapter);
-        if (getArguments()!=null){
+        if (getArguments() != null) {
             currentToken = getArguments().getString("token");
         }
         return mContainerView;
@@ -176,25 +177,30 @@ public class SearchContentFragment extends BaseSearchContentFragment {
 
     @Override
     protected void showSearchContent(String query) {
-        ZhiliaoApi.getMusic(currentToken, "keyword", query, getRequest(), new ISuccess<SongSearchEntity>() {
-            @Override
-            public void onSuccess(SongSearchEntity response) {
-                SearchContentFragment.this.mMusicEntities = response.getData();
+        if (!query.equals(mCurrentQuery)) {
+            ZhiliaoApi.getMusic(currentToken, "keyword", query, getRequest(), new ISuccess<SongSearchEntity>() {
+                @Override
+                public void onSuccess(SongSearchEntity response) {
+                    if (ZhiliaoApiHelper.isSuccess(response)) {
+                        mMusicEntities = response.getData();
 //                            MusicProvider.getInstance().setMusicList(SearchFragment.this.mMusicEntities);
-                if (mMusicEntities == null || mMusicEntities.size() <= 0) {
-                    Toast.makeText(getActivity(), "不好意思,没有您想要找的歌曲！", Toast.LENGTH_SHORT).show();
-                } else {
-                    if (mSearchAdapter.getHeaderLayoutCount() <= 0) {
-                        if (getHeaderView().getParent() != null) {
-                            ((ViewGroup) (getHeaderView().getParent())).removeView(getHeaderView());
+                        mCurrentQuery = query;
+                        if (mMusicEntities == null || mMusicEntities.size() <= 0) {
+                            mSearchAdapter.getData().clear();
+                            Toast.makeText(getActivity(), "不好意思,没有您想要找的歌曲！", Toast.LENGTH_SHORT).show();
+                        } else {
+                            if (mSearchAdapter.getHeaderLayoutCount() <= 0) {
+                                if (getHeaderView().getParent() != null) {
+                                    ((ViewGroup) (getHeaderView().getParent())).removeView(getHeaderView());
+                                }
+                                mSearchAdapter.addHeaderView(getHeaderView());
+                            }
+                            mSearchAdapter.setNewData(mMusicEntities);
                         }
-                        mSearchAdapter.addHeaderView(getHeaderView());
                     }
-                    mSearchAdapter.getData().clear();
-                    mSearchAdapter.setNewData(mMusicEntities);
                 }
-            }
-        }, null, null);
+            }, null, null);
+        }
     }
 
     @Override

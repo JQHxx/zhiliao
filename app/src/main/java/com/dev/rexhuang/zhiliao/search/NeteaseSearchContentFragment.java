@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.chad.library.adapter.base.BaseQuickAdapter;
+import com.chad.library.adapter.base.loadmore.LoadMoreView;
 import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.search.adapter.NeteaseSearchAdapter;
 import com.dev.rexhuang.zhiliao_core.api.musiclake.MusicLakeApi;
@@ -41,9 +42,10 @@ public class NeteaseSearchContentFragment extends BaseSearchContentFragment {
     private NeteaseSearchAdapter mNeteaseSearchAdapter;
 
     private static final int DEFAULT_LIMIT = 30;
+    private int loadmore = 0;
     private int offset = 0;
     private int page = 1;
-    private String query;
+    private int songCount = 0;
 
 
     public static NeteaseSearchContentFragment newInstance() {
@@ -90,26 +92,52 @@ public class NeteaseSearchContentFragment extends BaseSearchContentFragment {
                             }, null, null);
                         }
                     }
-                },null,null);
+                }, null, null);
 
             }
         });
         mNeteaseSearchAdapter.setOnLoadMoreListener(new BaseQuickAdapter.RequestLoadMoreListener() {
             @Override
             public void onLoadMoreRequested() {
-                MusicLakeApi.getSearchMusic(query, DEFAULT_LIMIT, offset, null, new ISuccess<NeteaseMusicEntity>() {
-                    @Override
-                    public void onSuccess(NeteaseMusicEntity response) {
-                        if (response != null && response.getCode() == 200) {
-                            mNeteaseSearchAdapter.addData(response.getResult().getSongs());
-                            mNeteaseSearchAdapter.loadMoreComplete();
-                            page++;
-                            offset = (page - 1) * DEFAULT_LIMIT;
+                if (loadmore < 0) {
+                    mNeteaseSearchAdapter.loadMoreEnd();
+                } else {
+                    MusicLakeApi.getSearchMusic(mCurrentQuery, DEFAULT_LIMIT, offset, null, new ISuccess<NeteaseMusicEntity>() {
+                        @Override
+                        public void onSuccess(NeteaseMusicEntity response) {
+                            if (response != null && response.getCode() == 200) {
+                                mNeteaseSearchAdapter.addData(response.getResult().getSongs());
+                                mNeteaseSearchAdapter.loadMoreComplete();
+                                page++;
+                                offset = (page - 1) * DEFAULT_LIMIT;
+                                loadmore --;
+                            }
                         }
-                    }
-                }, null, null);
+                    }, null, null);
+                }
             }
         }, rv_search);
+        mNeteaseSearchAdapter.setLoadMoreView(new LoadMoreView() {
+            @Override
+            public int getLayoutId() {
+                return R.layout.view_load_more;
+            }
+
+            @Override
+            protected int getLoadingViewId() {
+                return R.id.load_more_loading_view;
+            }
+
+            @Override
+            protected int getLoadFailViewId() {
+                return R.id.load_more_load_fail_view;
+            }
+
+            @Override
+            protected int getLoadEndViewId() {
+                return R.id.load_more_load_end_view;
+            }
+        });
         rv_search.setLayoutManager(new LinearLayoutManager(getActivity()));
         rv_search.setAdapter(mNeteaseSearchAdapter);
         return mContainerView;
@@ -117,29 +145,39 @@ public class NeteaseSearchContentFragment extends BaseSearchContentFragment {
 
     @Override
     protected void showSearchContent(String query) {
-        resetPage();
-        MusicLakeApi.getSearchMusic(query, DEFAULT_LIMIT, offset, getRequest(), new ISuccess<NeteaseMusicEntity>() {
-            @Override
-            public void onSuccess(NeteaseMusicEntity response) {
-                if (response != null && response.getCode() == 200) {
-                    NeteaseSearchContentFragment.this.query = query;
-                    page++;
-                    offset = (page - 1) * DEFAULT_LIMIT;
-                    if (mNeteaseSearchAdapter.getHeaderLayoutCount() <= 0) {
-                        if (getHeaderView().getParent() != null) {
-                            ((ViewGroup) (getHeaderView().getParent())).removeView(getHeaderView());
+        if (!query.equals(this.mCurrentQuery)) {
+            resetPage();
+            MusicLakeApi.getSearchMusic(query, DEFAULT_LIMIT, offset, getRequest(), new ISuccess<NeteaseMusicEntity>() {
+                @Override
+                public void onSuccess(NeteaseMusicEntity response) {
+                    if (response != null && response.getCode() == 200) {
+                        songCount = response.getResult().getSongCount();
+                        if (songCount <= DEFAULT_LIMIT) {
+                            loadmore = -1;
+                        } else {
+                            loadmore = (songCount / DEFAULT_LIMIT) - 1;
                         }
-                        mNeteaseSearchAdapter.addHeaderView(getHeaderView());
+                        NeteaseSearchContentFragment.this.mCurrentQuery = query;
+                        page++;
+                        offset = (page - 1) * DEFAULT_LIMIT;
+                        if (mNeteaseSearchAdapter.getHeaderLayoutCount() <= 0) {
+                            if (getHeaderView().getParent() != null) {
+                                ((ViewGroup) (getHeaderView().getParent())).removeView(getHeaderView());
+                            }
+                            mNeteaseSearchAdapter.addHeaderView(getHeaderView());
+                        }
+                        mNeteaseSearchAdapter.setNewData(response.getResult().getSongs());
                     }
-                    mNeteaseSearchAdapter.setNewData(response.getResult().getSongs());
                 }
-            }
-        }, null, null);
+            }, null, null);
+        }
     }
 
     private void resetPage() {
         page = 1;
         offset = 0;
+        loadmore = 0;
+        songCount = 0;
     }
 
     @Override

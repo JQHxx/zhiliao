@@ -8,6 +8,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
+import android.text.SpannableString;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -18,6 +19,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatTextView;
 import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.CircleCrop;
@@ -73,8 +75,6 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
 
     private QueueDialog queueDialog;
     private OnPlayerEventListener onPlayerEventListener;
-    private SwitchHandler handler = new SwitchHandler(this);
-    private static final int UPDATE_QUEUE = 102000000;
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -94,6 +94,15 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
     @BindView(R.id.song_list_button)
     IconicsTextView song_list_button;
 
+    @BindView(R.id.title)
+    protected AppCompatTextView mTitleTv;
+
+    @BindViews({R.id.iv_music_hall, R.id.iv_recommend, R.id.iv_find, R.id.iv_profile})
+    protected IconicsTextView[] sw_ivs;
+
+    @BindViews({R.id.tv_music_hall, R.id.tv_recommend, R.id.tv_find, R.id.tv_profile})
+    protected TextView[] sw_tvs;
+
     @OnClick(R.id.song_list_button)
     void onClickList() {
         showQueueDialog();
@@ -101,7 +110,7 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
 
     @OnClick(R.id.song_play_button)
     void onClickPlay() {
-        Logger.d(MusicManager.getInstance().isPlaying());
+        Logger.d("是否正在播放 : " + MusicManager.getInstance().isPlaying());
         if (MusicManager.getInstance().isPlaying()) {
             pauseMusic();
         } else {
@@ -134,6 +143,7 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
     @OnClick(R.id.controlbar)
     void onClickControl() {
         MusicEntity musicEntity = MusicManager.getInstance().getNowPlayingSongInfo();
+        Logger.d("现在没有可播放的歌曲，不跳转播放详情页。");
         if (musicEntity != null) {
             Intent intent = new Intent(getActivity(), DetailActivity.class);
             intent.putExtra(BaseActivity.EXTRA_CURRENT_MEDIA_DESCRIPTION, musicEntity != null ? musicEntity.getId() : null);
@@ -144,57 +154,24 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
         }
     }
 
-    @BindView(R.id.title)
-    protected AppCompatTextView mTitleTv;
-
-    @BindViews({R.id.iv_music_hall, R.id.iv_recommend, R.id.iv_find, R.id.iv_profile})
-    protected IconicsTextView[] sw_ivs;
-
-    @BindViews({R.id.tv_music_hall, R.id.tv_recommend, R.id.tv_find, R.id.tv_profile})
-    protected TextView[] sw_tvs;
-
     @OnClick(R.id.layout_bottom_music_hall)
     void onClickMusicHall() {
-        Toast.makeText(_mActivity, "onClickMusicHall", Toast.LENGTH_SHORT).show();
-        getSupportDelegate().showHideFragment(FRAGMENTS.get(FragmentKeys.MUSIC_HALL.name())
-                , mFragments[getCurrentFragment()]);
-        setCurrentFragment(FragmentKeys.MUSIC_HALL.ordinal());
-        if (mSwitchFragmentListener != null) {
-            mSwitchFragmentListener.onSwitchEnd();
-        }
+        checkAndSwitchFragment(FragmentKeys.MUSIC_HALL);
     }
 
     @OnClick(R.id.layout_bottom_recommend)
     void onClickRecommend() {
-        Toast.makeText(_mActivity, "onClickRecommend", Toast.LENGTH_SHORT).show();
-        getSupportDelegate().showHideFragment(FRAGMENTS.get(FragmentKeys.RECOMMEND.name())
-                , mFragments[getCurrentFragment()]);
-        setCurrentFragment(FragmentKeys.RECOMMEND.ordinal());
-        if (mSwitchFragmentListener != null) {
-            mSwitchFragmentListener.onSwitchEnd();
-        }
+        checkAndSwitchFragment(FragmentKeys.RECOMMEND);
     }
 
     @OnClick(R.id.layout_bottom_find)
     void onClickFind() {
-        Toast.makeText(_mActivity, "onClickFind", Toast.LENGTH_SHORT).show();
-        getSupportDelegate().showHideFragment(FRAGMENTS.get(FragmentKeys.FIND.name())
-                , mFragments[getCurrentFragment()]);
-        setCurrentFragment(FragmentKeys.FIND.ordinal());
-        if (mSwitchFragmentListener != null) {
-            mSwitchFragmentListener.onSwitchEnd();
-        }
+        checkAndSwitchFragment(FragmentKeys.FIND);
     }
 
     @OnClick(R.id.layout_bottom_profile)
     void onClickProfile() {
-        Toast.makeText(_mActivity, "onClickProfile", Toast.LENGTH_SHORT).show();
-        getSupportDelegate().showHideFragment(FRAGMENTS.get(FragmentKeys.PROFILE.name())
-                , mFragments[getCurrentFragment()]);
-        setCurrentFragment(FragmentKeys.PROFILE.ordinal());
-        if (mSwitchFragmentListener != null) {
-            mSwitchFragmentListener.onSwitchEnd();
-        }
+        checkAndSwitchFragment(FragmentKeys.PROFILE);
     }
 
     /**
@@ -205,12 +182,12 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
     public abstract void loadFragments(int containerId);
 
     private void setCurrentFragment(int index) {
-        setPreviousFragment(this.mCurrentFragment);
-        this.mCurrentFragment = index;
+        setPreviousFragment(mCurrentFragment);
+        mCurrentFragment = index;
     }
 
     protected int getCurrentFragment() {
-        return this.mCurrentFragment;
+        return mCurrentFragment;
     }
 
     @Override
@@ -271,7 +248,7 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
 
             @Override
             public void onError(int errorCode, String errorMsg) {
-                Toast.makeText(get_mActivity(), "播放出错!!", Toast.LENGTH_SHORT).show();
+                Toast.makeText(get_mActivity(), "播放出错，请重试或选择其它的歌曲!!", Toast.LENGTH_SHORT).show();
             }
 
             @Override
@@ -318,20 +295,31 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
     public void onStop() {
         super.onStop();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
 
     @Override
     public void onDestroyView() {
         MusicManager.getInstance().removePlayerEventListener(onPlayerEventListener);
         stopAnimation();
         super.onDestroyView();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
     }
 
 
@@ -373,7 +361,9 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
 
     private void showStopped() {
         showPaused();
-        song_description.setText("知了音乐 让生活充满音乐");
+        SpannableString spannableString = new SpannableString("知了音乐 让生活充满音乐");
+//        spannableString.setSpan(ne);
+        song_description.setText(spannableString);
         Glide.with(getActivity()).clear(song_cover);
         song_cover.setRotation(0f);
         song_cover.setImageDrawable(getActivity().getDrawable(R.drawable.diskte));
@@ -444,19 +434,13 @@ public abstract class ZhiliaoSwitchFragment extends ZhiliaoFragment implements S
         MusicManager.getInstance().pauseMusic();
     }
 
-    private static class SwitchHandler extends Handler {
-        private WeakReference<ZhiliaoSwitchFragment> zhiliaoSwitchFragmentWeakReference;
-
-        public SwitchHandler(ZhiliaoSwitchFragment zhiliaoSwitchFragment) {
-            zhiliaoSwitchFragmentWeakReference = new WeakReference<>(zhiliaoSwitchFragment);
-        }
-
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-            ZhiliaoSwitchFragment zhiliaoSwitchFragment = zhiliaoSwitchFragmentWeakReference.get();
-            switch (msg.what) {
-                case UPDATE_QUEUE:
+    private void checkAndSwitchFragment(FragmentKeys fragmentKey) {
+        if (getCurrentFragment() != fragmentKey.ordinal()) {
+            getSupportDelegate().showHideFragment(FRAGMENTS.get(fragmentKey.name())
+                    , mFragments[getCurrentFragment()]);
+            setCurrentFragment(fragmentKey.ordinal());
+            if (mSwitchFragmentListener != null) {
+                mSwitchFragmentListener.onSwitchEnd();
             }
         }
     }

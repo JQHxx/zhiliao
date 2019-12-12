@@ -40,6 +40,8 @@ public class ZhiliaoApplication extends Application {
         MusicManager.getInstance().setNotificationConstructor(notificationConstructor);
         ExoDownload.initExoDownload(this);
         ExoDownload.getInstance().setOpenCache(true);
+
+        //用户注册登录
         UserManager.init(this);
     }
 

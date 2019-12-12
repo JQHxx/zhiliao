@@ -37,13 +37,8 @@ public class SplashFragment extends ZhiliaoFragment implements ITimerListener {
 
     private Timer mTimer = null;
     private int mCount = 5;
-
-    public SplashFragment withISplashListener(ISplashListener mISplashListener) {
-        this.mISplashListener = mISplashListener;
-        return this;
-    }
-
     private ISplashListener mISplashListener;
+
 
     @Override
     public Object setLayout() {
@@ -80,8 +75,12 @@ public class SplashFragment extends ZhiliaoFragment implements ITimerListener {
 
     private void startToMain() {
         if (mISplashListener != null) {
-            mISplashListener.onSplashEnd(null,
-                    get_mActivity().getIntent());
+            mISplashListener.onSplashEnd();
         }
+    }
+
+    public SplashFragment withISplashListener(ISplashListener mISplashListener) {
+        this.mISplashListener = mISplashListener;
+        return this;
     }
 }

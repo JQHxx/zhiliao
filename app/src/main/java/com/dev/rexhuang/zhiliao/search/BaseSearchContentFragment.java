@@ -14,6 +14,8 @@ import com.dev.rexhuang.zhiliao_core.net.callback.IRequest;
  */
 public abstract class BaseSearchContentFragment extends Fragment {
 
+    protected String mCurrentQuery;
+
     protected View mHeaderView;
 
     protected IRequest request;
