@@ -1,5 +1,7 @@
 package com.dev.rexhuang.zhiliao.music_hall;
 
+import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
@@ -16,6 +18,7 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.dev.rexhuang.zhiliao.R;
 import com.dev.rexhuang.zhiliao.login.UserManager;
 import com.dev.rexhuang.zhiliao.music_hall.adapter.NeteasePlayListDetailAdapter;
@@ -30,6 +33,7 @@ import com.dev.rexhuang.zhiliao_core.entity.SongListDetailEntity;
 import com.dev.rexhuang.zhiliao_core.net.callback.IRequest;
 import com.dev.rexhuang.zhiliao_core.net.callback.ISuccess;
 import com.dyhdyh.widget.loadingbar2.LoadingBar;
+import com.google.android.material.appbar.AppBarLayout;
 import com.gyf.immersionbar.ImmersionBar;
 
 import org.json.JSONException;
@@ -46,8 +50,8 @@ import butterknife.ButterKnife;
  */
 public class PlayListActivity extends ZhiliaoActivity {
 
-    private static final String NETEASEMUSICAPI = "NeteaseMusicApi";
-    private static final String ZHILIAOAPI = "ZhiliaoApi";
+    public static final String NETEASEMUSICAPI = "NeteaseMusicApi";
+    public static final String ZHILIAOAPI = "ZhiliaoApi";
     @BindView(R.id.playlist_toolbar)
     Toolbar playlist_toolbar;
 
@@ -69,6 +73,9 @@ public class PlayListActivity extends ZhiliaoActivity {
     @BindView(R.id.tv_title)
     TextView tv_title;
 
+    @BindView(R.id.playlist_appBarLayout)
+    AppBarLayout playlist_appBarLayout;
+
     private View headerView;
     private PlayListDetailAdapter playlistDetailAdapter;
     private NeteasePlayListDetailAdapter neteasePlayListDetailAdapter;
@@ -78,7 +85,7 @@ public class PlayListActivity extends ZhiliaoActivity {
         public void onRequestStart() {
             if (rl_loading != null) {
                 rl_loading.setVisibility(View.VISIBLE);
-                Log.d("rl_loading","show");
+                Log.d("rl_loading", "show");
                 LoadingBar.view(rl_loading)
                         .setFactoryFromResource(R.layout.loading_view)
                         .show();
@@ -88,7 +95,7 @@ public class PlayListActivity extends ZhiliaoActivity {
         @Override
         public void onRequestEnd() {
             if (rl_loading != null) {
-                Log.d("rl_loading","disappear");
+                Log.d("rl_loading", "disappear");
                 rl_loading.setVisibility(View.GONE);
                 LoadingBar.view(rl_loading).cancel();
             }
@@ -122,14 +129,18 @@ public class PlayListActivity extends ZhiliaoActivity {
 
         String playList_ID = getIntent().getStringExtra("PlayList_ID");
         String playList_NAME = getIntent().getStringExtra("PlayList_NAME");
-        int coverPosition = getIntent().getIntExtra("PlayList_COVER", 1);
-        Bitmap coverBitmap = BitmapFactory.decodeResource(getResources(), drawables[coverPosition]);
+//        int coverPosition = getIntent().getIntExtra("PlayList_COVER", 1);
+        String PlayList_COVER = getIntent().getStringExtra("PlayList_COVER");
+        Bitmap coverBitmap = BitmapFactory.decodeResource(getResources(), drawables[0]);
+        Glide.with(this)
+                .load(PlayList_COVER)
+                .into(iv_playlist_cover);
         ImmersionBar.with(this)
                 .titleBar(playlist_toolbar)
                 .init();
-        iv_playlist_cover.setImageBitmap(coverBitmap);
+//        iv_playlist_cover.setImageBitmap(coverBitmap);
 //        Drawable blur = BitmapUtils.createBlurredImageFromBitmap(coverBitmap, 12);
-        playlist_cl.setBackground(getDrawable(drawables[coverPosition]));
+//        playlist_cl.setBackground(getDrawable(drawables[coverPosition]));
         tv_title.setText(playList_NAME);
         tv_playlist_name.setText(playList_NAME);
         playlist_rv.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL, false));
@@ -169,5 +180,21 @@ public class PlayListActivity extends ZhiliaoActivity {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static Intent actionStart(String From, String PlayList_ID, String PlayList_NAME, String PlayList_COVER, Context context) {
+        Intent intent = new Intent(context, PlayListActivity.class);
+        intent.putExtra("From", From);
+        intent.putExtra("PlayList_ID", PlayList_ID);
+        intent.putExtra("PlayList_NAME", PlayList_NAME);
+        intent.putExtra("PlayList_COVER", PlayList_COVER);
+        return intent;
+    }
+
+    @Override
+    protected void onDestroy() {
+
+//        Glide.with(getApplicationContext()).clear(iv_playlist_cover);
+        super.onDestroy();
     }
 }

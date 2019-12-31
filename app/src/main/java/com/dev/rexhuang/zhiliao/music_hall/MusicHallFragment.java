@@ -12,6 +12,7 @@ import com.dev.rexhuang.zhiliao_core.api.musiclake.MusicLakeApi;
 import com.dev.rexhuang.zhiliao_core.api.zhiliao.ZhiliaoApi;
 import com.dev.rexhuang.zhiliao_core.base.ZhiliaoMainFragment;
 import com.dev.rexhuang.zhiliao_core.entity.BannerEntity;
+import com.dev.rexhuang.zhiliao_core.entity.NeteaseResourceType;
 import com.dev.rexhuang.zhiliao_core.entity.RecommendSongListEntity;
 import com.dev.rexhuang.zhiliao_core.entity.SongListEntity;
 import com.dev.rexhuang.zhiliao.music_hall.adapter.MultipleItemsCreator;
@@ -21,6 +22,7 @@ import com.dev.rexhuang.zhiliao_core.net.callback.ISuccess;
 import com.orhanobut.logger.Logger;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.BrokenBarrierException;
 import java.util.concurrent.CyclicBarrier;
@@ -42,8 +44,8 @@ import butterknife.BindView;
  */
 public class MusicHallFragment extends ZhiliaoMainFragment {
 
-    private final int count = 3;
-    private CyclicBarrier cyclicBarrier = new CyclicBarrier(count);
+    private final int REQUEST_COUNT = 3;
+    private CyclicBarrier cyclicBarrier = new CyclicBarrier(REQUEST_COUNT);
     private MultipleItemsCreator creator;
 
     @BindView(R.id.rv_music_hall)
@@ -51,6 +53,8 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
 
     @BindView(R.id.swipe_layout)
     SwipeRefreshLayout swipe_layout;
+
+    private MusicHallEvent mMusicHallEvent;
 
 
     private List<String> imagesArray = new ArrayList<>();
@@ -124,8 +128,10 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onMessageEvent(MusicHallEvent event) {
-        multipleRecyclerAdapter.setNewData(event.multipleItemEntities);
-        swipe_layout.setRefreshing(false);
+        multipleRecyclerAdapter.setNewData(event.getMultipleItemEntities());
+        if (swipe_layout.isRefreshing()) {
+            swipe_layout.setRefreshing(false);
+        }
     }
 
     @Override
@@ -157,7 +163,9 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
                         } catch (InterruptedException e) {
                             e.printStackTrace();
                         }
-                        EventBus.getDefault().post(new MusicHallEvent(creator.create()));
+                        mMusicHallEvent = mMusicHallEvent == null ? new MusicHallEvent(creator.create()) :
+                                mMusicHallEvent.setMultipleItemEntities(creator.create());
+                        EventBus.getDefault().post(mMusicHallEvent);
                     }
                 }.start();
             }
@@ -167,6 +175,14 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
             public void onSuccess(BannerEntity response) {
                 if (response != null && response.getCode() == 200) {
                     List<BannerEntity.BannersEntity> bannersEntities = response.getBanners();
+                    if (bannersEntities != null && bannersEntities.size() > 0) {
+                        Iterator<BannerEntity.BannersEntity> iterator = bannersEntities.iterator();
+                        while (iterator.hasNext()) {
+                            if (!isHandlerEnableBanner(iterator.next().getTargetType())) {
+                                iterator.remove();
+                            }
+                        }
+                    }
                     creator.setImagesArray(bannersEntities);
                     try {
                         cyclicBarrier.await();
@@ -194,5 +210,15 @@ public class MusicHallFragment extends ZhiliaoMainFragment {
                 }
             }
         }, null, null);
+    }
+
+    public boolean isHandlerEnableBanner(String targetTypeStr) {
+        int targetType = Integer.valueOf(targetTypeStr);
+        if (targetType == NeteaseResourceType.TYPE_MUSIC || targetType == NeteaseResourceType.TYPE_ALBUM ||
+                targetType == NeteaseResourceType.TYPE_PLAY_LIST || targetType == NeteaseResourceType.TYPE_VIDEO ||
+                targetType == NeteaseResourceType.TYPE_MV) {
+            return true;
+        }
+        return false;
     }
 }

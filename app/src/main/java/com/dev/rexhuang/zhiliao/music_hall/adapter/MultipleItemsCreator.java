@@ -20,7 +20,7 @@ public class MultipleItemsCreator {
     private List<RecommendSongListEntity.ResultEntity> resultEntities;
     private List<BannerEntity.BannersEntity> imagesArray;
 
-//    List<SongListEntity.DataEntity> dataEntity, List<BannerEntity.BannersEntity> imagesArray
+    //    List<SongListEntity.DataEntity> dataEntity, List<BannerEntity.BannersEntity> imagesArray
     public MultipleItemsCreator() {
 //        this.dataEntity = dataEntity;
 //        this.imagesArray = imagesArray;
@@ -74,15 +74,19 @@ public class MultipleItemsCreator {
         songListItem.setField(MultipleItemType.ITEM_TYPE, MultipleItemType.SONGLIST.ordinal());
         songListItem.setField(MultipleItemType.SONGLIST, dataEntity);
 
-        multipleItemEntities.add(bannerItem);
+        if (imagesArray != null) {
+            multipleItemEntities.add(bannerItem);
+        }
         multipleItemEntities.add(choiceItem);
         multipleItemEntities.add(ageItem);
         if (resultEntities != null) {
             multipleItemEntities.add(recommendSongListTextItem);
             multipleItemEntities.add(recommendSongListItem);
         }
-        multipleItemEntities.add(songListTextItem);
-        multipleItemEntities.add(songListItem);
+        if (dataEntity != null) {
+            multipleItemEntities.add(songListTextItem);
+            multipleItemEntities.add(songListItem);
+        }
         return this.multipleItemEntities;
     }
 

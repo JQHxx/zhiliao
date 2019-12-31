@@ -42,10 +42,10 @@ public class NeteaseSearchContentFragment extends BaseSearchContentFragment {
     private NeteaseSearchAdapter mNeteaseSearchAdapter;
 
     private static final int DEFAULT_LIMIT = 30;
-    private int loadmore = 0;
     private int offset = 0;
     private int page = 1;
-    private int songCount = 0;
+//    private int loadmore = 0;
+//    private int songCount = 0;
 
 
     public static NeteaseSearchContentFragment newInstance() {
@@ -99,22 +99,23 @@ public class NeteaseSearchContentFragment extends BaseSearchContentFragment {
         mNeteaseSearchAdapter.setOnLoadMoreListener(new BaseQuickAdapter.RequestLoadMoreListener() {
             @Override
             public void onLoadMoreRequested() {
-                if (loadmore < 0) {
-                    mNeteaseSearchAdapter.loadMoreEnd();
-                } else {
+
                     MusicLakeApi.getSearchMusic(mCurrentQuery, DEFAULT_LIMIT, offset, null, new ISuccess<NeteaseMusicEntity>() {
                         @Override
                         public void onSuccess(NeteaseMusicEntity response) {
                             if (response != null && response.getCode() == 200) {
-                                mNeteaseSearchAdapter.addData(response.getResult().getSongs());
-                                mNeteaseSearchAdapter.loadMoreComplete();
-                                page++;
-                                offset = (page - 1) * DEFAULT_LIMIT;
-                                loadmore --;
+                                if(response.getResult() != null && response.getResult().getSongs() != null) {
+                                    mNeteaseSearchAdapter.addData(response.getResult().getSongs());
+                                    mNeteaseSearchAdapter.loadMoreComplete();
+                                    page++;
+                                    offset = (page - 1) * DEFAULT_LIMIT;
+                                } else {
+                                    mNeteaseSearchAdapter.loadMoreEnd();
+                                }
                             }
                         }
                     }, null, null);
-                }
+
             }
         }, rv_search);
         mNeteaseSearchAdapter.setLoadMoreView(new LoadMoreView() {
@@ -151,12 +152,6 @@ public class NeteaseSearchContentFragment extends BaseSearchContentFragment {
                 @Override
                 public void onSuccess(NeteaseMusicEntity response) {
                     if (response != null && response.getCode() == 200) {
-                        songCount = response.getResult().getSongCount();
-                        if (songCount <= DEFAULT_LIMIT) {
-                            loadmore = -1;
-                        } else {
-                            loadmore = (songCount / DEFAULT_LIMIT) - 1;
-                        }
                         NeteaseSearchContentFragment.this.mCurrentQuery = query;
                         page++;
                         offset = (page - 1) * DEFAULT_LIMIT;
@@ -176,8 +171,8 @@ public class NeteaseSearchContentFragment extends BaseSearchContentFragment {
     private void resetPage() {
         page = 1;
         offset = 0;
-        loadmore = 0;
-        songCount = 0;
+//        loadmore = 0;
+//        songCount = 0;
     }
 
     @Override

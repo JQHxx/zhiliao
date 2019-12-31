@@ -98,12 +98,8 @@ public class MultipleRecyclerAdapter extends BaseMultiItemQuickAdapter<MultipleI
                         @Override
                         public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                             RecommendSongListEntity.ResultEntity resultEntity = resultEntities.get(position);
-                            Intent intent = new Intent(mContext, PlayListActivity.class);
-                            intent.putExtra("From","NeteaseMusicApi");
-                            intent.putExtra("PlayList_ID", resultEntity.getId());
-                            intent.putExtra("PlayList_COVER", position);
-                            intent.putExtra("PlayList_NAME", resultEntity.getName());
-                            mContext.startActivity(intent);
+                            mContext.startActivity(PlayListActivity.actionStart("NeteaseMusicApi", resultEntity.getId(),
+                                    resultEntity.getName(), resultEntity.getPicUrl(), mContext));
                         }
                     });
                     recommSongList.setAdapter(recommendSongListAdapter);
@@ -127,12 +123,8 @@ public class MultipleRecyclerAdapter extends BaseMultiItemQuickAdapter<MultipleI
                         @Override
                         public void onItemClick(BaseQuickAdapter adapter, View view, int position) {
                             SongListEntity.DataEntity dataEntity = dataEntities.get(position);
-                            Intent intent = new Intent(mContext, PlayListActivity.class);
-                            intent.putExtra("From","ZhiliaoApi");
-                            intent.putExtra("PlayList_ID", dataEntity.getId());
-                            intent.putExtra("PlayList_COVER", position);
-                            intent.putExtra("PlayList_NAME", dataEntity.getName());
-                            mContext.startActivity(intent);
+                            mContext.startActivity(PlayListActivity.actionStart("ZhiliaoApi", dataEntity.getId(),
+                                    dataEntity.getName(), dataEntity.getCover(), mContext));
                         }
                     });
                     songList.setAdapter(songListAdapter);

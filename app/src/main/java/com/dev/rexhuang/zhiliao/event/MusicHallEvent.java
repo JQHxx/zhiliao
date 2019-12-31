@@ -10,10 +10,18 @@ import java.util.List;
  * *  on 2019/9/12
  */
 public class MusicHallEvent {
-    public final List<MultipleItemEntity> multipleItemEntities;
+    private List<MultipleItemEntity> multipleItemEntities;
 
     public MusicHallEvent(List<MultipleItemEntity> multipleItemEntities) {
         this.multipleItemEntities = multipleItemEntities;
     }
 
+    public MusicHallEvent setMultipleItemEntities(List<MultipleItemEntity> multipleItemEntities) {
+        this.multipleItemEntities = multipleItemEntities;
+        return this;
+    }
+
+    public List<MultipleItemEntity> getMultipleItemEntities() {
+        return multipleItemEntities;
+    }
 }
